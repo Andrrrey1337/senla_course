@@ -12,7 +12,7 @@ public class HotelTest {
         admin.checkIn(1, "Иван");
         admin.checkIn(3, "Максим");
 
-        admin.setRoomStatus(2, RoomStatus.REPAiR);
+        admin.setRoomStatus(2, RoomStatus.REPAIR);
 
         admin.checkOut(3);
 

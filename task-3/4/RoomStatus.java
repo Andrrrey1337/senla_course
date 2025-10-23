@@ -1,3 +1,3 @@
 public enum RoomStatus {
-    AVAILABLE, OCCUPIED, REPAiR
+    AVAILABLE, OCCUPIED, REPAIR
 }
