@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
+package task_3;
 
 public class AssemblyLine implements IAssemblyLine{
     private ILineStep step1;
@@ -21,7 +20,11 @@ public class AssemblyLine implements IAssemblyLine{
         product.installFirstPart(firstPart);
         product.installSecondPart(secondPart);
         product.installThirdPart(thirdPart);
-        System.out.printf("Танк собран\nПервая часть: %s\nВторая часть: %s\nТретья часть: %s", firstPart, secondPart, thirdPart);
+        System.out.printf("""
+                Танк собран
+                Первая часть: %s
+                Вторая часть: %s
+                Третья часть: %s""",firstPart,secondPart,thirdPart);
         return product;
     }
 }

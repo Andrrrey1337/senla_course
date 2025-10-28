@@ -1,3 +1,5 @@
+package task_4;
+
 public class Room {
     private int number;
     private double price;

@@ -1,3 +1,5 @@
+package task_2;
+
 abstract class Flower {
     protected String name;
     protected String color;

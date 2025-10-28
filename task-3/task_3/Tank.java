@@ -1,3 +1,5 @@
+package task_3;
+
 public class Tank implements IProduct{
     private IProductPart firstPart;  // корпус
     private IProductPart secondPart; // двигатель

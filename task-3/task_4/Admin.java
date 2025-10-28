@@ -1,3 +1,5 @@
+package task_4;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,9 +32,9 @@ public class Admin {
             System.out.println("Комната итак свободна");
             return;
         }
+        System.out.println("Гость: " + room.getGuestName() + " выселен из номера: " + number);
         room.setGuestName("None");
         room.setStatus(RoomStatus.AVAILABLE);
-        System.out.println("Гость: " + room.getGuestName() + " выселен из номера: " + number);
     }
 
     public void setRoomStatus(int number, RoomStatus status) {

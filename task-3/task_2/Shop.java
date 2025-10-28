@@ -1,3 +1,5 @@
+package task_2;
+
 public class Shop {
     public static void main(String[] args) {
         Rose redRose = new Rose("красный",250);

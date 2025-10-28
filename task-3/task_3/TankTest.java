@@ -1,3 +1,5 @@
+package task_3;
+
 public class TankTest {
     public static void main(String[] args){
         ILineStep frameStep = new FrameStep();

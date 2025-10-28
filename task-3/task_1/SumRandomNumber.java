@@ -1,3 +1,5 @@
+package task_1;
+
 public class SumRandomNumber {
     public static void main(String[] args) {
         int numb1 = (new java.util.Random()).nextInt(900) + 100;
