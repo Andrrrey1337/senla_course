@@ -25,5 +25,5 @@ replay_pid*
 .DS_Store
 
 .idea
-senla_course3.iml
 out
+*.iml
