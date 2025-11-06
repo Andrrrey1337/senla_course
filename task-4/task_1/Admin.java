@@ -24,16 +24,30 @@ public class Admin {
             System.out.println("Такая услуга не найдена: " + serviceName);
             return;
         }
+        Guest guest = createOrFindGuest(guestName);
+        if (!serviceRecords.containsKey(guest)) {
+            serviceRecords.put(guest, new ArrayList<>());
+        }
+        serviceRecords.get(guest).add(new ServiceRecord(serviceName, date));
+        System.out.println("Гость " + guestName + " заказал услугу " + serviceName + " на " + date);
     }
 
-    public void checkIn(int number, String guestName, LocalDate checkInDate, LocalDate checkOutDate) {
+    private Room getAndValidateRoom(int number, RoomStatus requiredStatus, String message) {
         Room room = rooms.get(number);
         if (room == null) {
             System.out.println("Номер не найден");
-            return;
+            return null;
         }
-        if (room.getStatus() != RoomStatus.AVAILABLE) {
-            System.out.println("Номер не доступен");
+        if (requiredStatus != room.getStatus()) {
+            System.out.println(message);
+            return null;
+        }
+        return room;
+    }
+
+    public void checkIn(int number, String guestName, LocalDate checkInDate, LocalDate checkOutDate) {
+        Room room = getAndValidateRoom(number, RoomStatus.AVAILABLE, "Номер не доступен");
+        if (room == null) {
             return;
         }
         Guest guest = createOrFindGuest(guestName);
@@ -46,19 +60,14 @@ public class Admin {
     }
 
     public void checkOut(int number) {
-        Room room = rooms.get(number);
+        Room room = getAndValidateRoom(number, RoomStatus.OCCUPIED, "Комната итак свободна");
         if (room == null) {
-            System.out.println("Номер не найден");
-            return;
-        }
-        if (room.getStatus() != RoomStatus.OCCUPIED) {
-            System.out.println("Комната итак свободна");
             return;
         }
         System.out.println("Гость: " + room.getGuest() + " выселен из номера: " + number);
         room.setGuest(null);
         room.setStatus(RoomStatus.AVAILABLE);
-        room.setCheckOutDate(null);
+        room.setCheckInDate(null);
         room.setCheckOutDate(null);
     }
 
@@ -78,8 +87,13 @@ public class Admin {
             System.out.println("Номер не найден");
             return;
         }
-        room.setPrice(newPrice);
-        System.out.println("Стоимость номера " + number + " изменена на: " + newPrice);
+        if (newPrice != room.getPrice()) {
+            room.setPrice(newPrice);
+            System.out.println("Стоимость номера " + number + " изменена на: " + newPrice);
+        }
+        else {
+            System.out.println("Новая стоимость номера " + number + " равна прежней");
+        }
     }
 
     public void updatePriceService(String name, double newPrice) {
@@ -88,8 +102,13 @@ public class Admin {
             System.out.println("Услуга не найдена");
             return;
         }
-        service.setPrice(newPrice);
-        System.out.println("Стоимость услуги: " + name + " изменена на: " + newPrice);
+        if (newPrice != service.getPrice()) {
+            service.setPrice(newPrice);
+            System.out.println("Новая стоимость услуги " + name + " равна прежней");
+        }
+        else {
+            System.out.println("Новая стоимость равна прежней");
+        }
     }
 
     public void addRoom(int number, double price, int capacity, int stars) {
@@ -137,7 +156,7 @@ public class Admin {
     }
 
     public void printSortedRoomsByCapacity() {
-        System.out.println("Номера отсортированы вместительности: ");
+        System.out.println("Номера отсортированы по вместительности: ");
         printSortedRooms(Comparator.comparingInt(Room::getCapacity));
     }
 
@@ -171,7 +190,7 @@ public class Admin {
 
     private void printGuests(Comparator<Room> comparator) {
         List<Room> occupied = rooms.values().stream()
-                .filter(q -> q.getStatus() == RoomStatus.OCCUPIED)
+                .filter(q -> RoomStatus.OCCUPIED == q.getStatus())
                 .sorted(comparator)
                 .toList();
         for (Room room : occupied) {
@@ -191,22 +210,22 @@ public class Admin {
 
     public void printCountAvailableRooms() {
         long count = rooms.values().stream()
-                .filter(q -> q.getStatus() == RoomStatus.AVAILABLE)
+                .filter(q -> RoomStatus.AVAILABLE == q.getStatus())
                 .count();
         System.out.println("Всего свободных номеров: " + count);
     }
 
     public void printCountGuests() {
         long count = rooms.values().stream()
-                .filter(q -> q.getStatus() == RoomStatus.OCCUPIED)
+                .filter(q -> RoomStatus.OCCUPIED == q.getStatus())
                 .count();
         System.out.println("Всего жильцов: " + count);
     }
 
     public void printRoomAvailableByDate(LocalDate date) {
         List<Room> available = rooms.values().stream()
-                .filter(room -> room.getStatus() == RoomStatus.AVAILABLE ||
-                        (room.getCheckOutDate() != null && date.isAfter(room.getCheckOutDate())))
+                .filter(room -> RoomStatus.AVAILABLE == room.getStatus() ||
+                        (null != room.getCheckOutDate() && date.isAfter(room.getCheckOutDate())))
                 .toList();
         System.out.println("Номера свободные к " + date +':');
         for (Room room : available) {
@@ -254,7 +273,7 @@ public class Admin {
 
     public void printGuestServicesByPrice(String guestName) {
         System.out.println("Список услуг постояльца " + guestName + ", отсортированный по алфавиту: ");
-        printGuestServices(Comparator.comparingDouble(ServiceRecord->services.get(ServiceRecord.getName()).getPrice()),guestName);
+        printGuestServices(Comparator.comparingDouble(serviceRecord->services.get(serviceRecord.getName()).getPrice()),guestName);
     }
 
     public void printGuestServicesByDate(String guestName) {
@@ -280,6 +299,6 @@ public class Admin {
     }
 
     public void printRoomDetails(int number) {
-        System.out.println(rooms.get(number));
+        System.out.println("Информация о номере: " + number + "\n" + rooms.get(number));
     }
 }
