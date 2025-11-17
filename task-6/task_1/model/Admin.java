@@ -25,7 +25,7 @@ public class Admin {
     }
 
     private Guest createOrFindGuest(String name) throws HotelException {
-        if (name == null || name.trim().isEmpty()) {
+        if (name == null || name.isEmpty()) {
             throw new HotelException("Имя гостя не может быть пустым");
         }
         if (guestsByName.containsKey(name)){
@@ -55,7 +55,7 @@ public class Admin {
         if (room == null) {
             throw new HotelException("Комната с номером " + number + " не найдена");
         }
-        if (room.getStatus() != RoomStatus.AVAILABLE) {
+        if (RoomStatus.AVAILABLE != room.getStatus()) {
             throw new HotelException("Комната с номером " + number + " недоступна для заселения (статус: " + room.getStatus() + ")");
         }
         if (checkInDate.isAfter(checkOutDate)) {
@@ -74,7 +74,7 @@ public class Admin {
         if (room == null) {
             throw new HotelException("Комната с номером " + number + " не найдена");
         }
-        if (room.getStatus() != RoomStatus.OCCUPIED) {
+        if (RoomStatus.OCCUPIED != room.getStatus()) {
             throw new HotelException("Комната с номером " + number + " не занята, невозможно выполнить выселение");
         }
         room.setGuest(null);
@@ -123,7 +123,7 @@ public class Admin {
     }
 
     public void addService(String name, double price) throws HotelException {
-        if (name == null || name.trim().isEmpty()) {
+        if (name == null || name.isEmpty()) {
             throw new HotelException("Название услуги не может быть пустым");
         }
         if (price < 0) {
@@ -153,34 +153,34 @@ public class Admin {
 
     public List<Room> getAvailableRooms(Comparator<Room> comparator) {
         return rooms.values().stream()
-                .filter(r -> r.getStatus() == RoomStatus.AVAILABLE)
+                .filter(room -> RoomStatus.AVAILABLE == room.getStatus())
                 .sorted(comparator)
                 .toList();
     }
 
     public List<Room> getRoomAvailableByDate(LocalDate date) {
         return rooms.values().stream()
-                .filter(room -> room.getStatus() == RoomStatus.AVAILABLE ||
+                .filter(room -> RoomStatus.AVAILABLE == room.getStatus() ||
                         (room.getCheckOutDate() != null && date.isAfter(room.getCheckOutDate())))
                 .toList();
     }
 
     public List<Room> getGuests(Comparator<Room> comparator) {
         return rooms.values().stream()
-                .filter(r -> r.getStatus() == RoomStatus.OCCUPIED)
+                .filter(room -> RoomStatus.OCCUPIED == room.getStatus())
                 .sorted(comparator)
                 .toList();
     }
 
     public long getCountAvailableRooms() {
         return rooms.values().stream()
-                .filter(r -> r.getStatus() == RoomStatus.AVAILABLE)
+                .filter(room ->RoomStatus.AVAILABLE == room.getStatus())
                 .count();
     }
 
     public long getCountGuests() {
         return rooms.values().stream()
-                .filter(r -> r.getStatus() == RoomStatus.OCCUPIED)
+                .filter(room -> RoomStatus.OCCUPIED == room.getStatus())
                 .count();
     }
 
@@ -280,8 +280,8 @@ public class Admin {
 
     public void exportServices(String path) throws HotelException {
         List<String> lines = new ArrayList<>();
-        for (Service s : servicesById.values()) {
-            lines.add(s.getId() + ";" + s.getName() + ";" + s.getPrice());
+        for (Service service : servicesById.values()) {
+            lines.add(service.getId() + ";" + service.getName() + ";" + service.getPrice());
         }
         CsvManager.write(path, lines);
     }
@@ -305,9 +305,9 @@ public class Admin {
                     servicesByName.remove(ex.getName());
                     servicesByName.put(name, ex);
                 } else {
-                    Service s = new Service(id, name, price);
-                    servicesById.put(id, s);
-                    servicesByName.put(name, s);
+                    Service service = new Service(id, name, price);
+                    servicesById.put(id, service);
+                    servicesByName.put(name, service);
                 }
             }
             if (maxId > 0) IdGenerator.setNext(maxId + 1);
@@ -318,10 +318,10 @@ public class Admin {
 
     public void exportRooms(String path) throws HotelException {
         List<String> lines = new ArrayList<>();
-        for (Room r : rooms.values()) {
-            long guestId = r.getGuest() != null ? r.getGuest().getId() : 0;
-            lines.add(r.getId() + ";" + r.getNumber() + ";" + r.getPrice() + ";" + r.getCapacity() + ";" +
-                    r.getStars() + ";" + r.getStatus() + ";" + guestId);
+        for (Room room : rooms.values()) {
+            long guestId = room.getGuest() != null ? room.getGuest().getId() : 0;
+            lines.add(room.getId() + ";" + room.getNumber() + ";" + room.getPrice() + ";" + room.getCapacity() + ";" +
+                    room.getStars() + ";" + room.getStatus() + ";" + guestId);
         }
         CsvManager.write(path, lines);
     }
@@ -375,11 +375,11 @@ public class Admin {
                         }
                     } else {
                         // создать новую комнату с указанным id
-                        Room r = new Room(id, number, price, capacity, stars, status);
+                        Room room = new Room(id, number, price, capacity, stars, status);
                         if (guestsById.containsKey(guestId)) {
-                            r.setGuest(guestsById.get(guestId));
+                            room.setGuest(guestsById.get(guestId));
                         }
-                        rooms.put(number, r);
+                        rooms.put(number, room);
                     }
                 }
             }
@@ -392,8 +392,8 @@ public class Admin {
     public void exportServiceRecords(String path) throws HotelException {
         List<String> lines = new ArrayList<>();
         for (Map.Entry<Long, List<ServiceRecord>> e : serviceRecordsByGuestId.entrySet()) {
-            for (ServiceRecord r : e.getValue()) {
-                lines.add(r.getId() + ";" + r.getGuestId() + ";" + r.getServiceId() + ";" + r.getDate());
+            for (ServiceRecord record : e.getValue()) {
+                lines.add(record.getId() + ";" + record.getGuestId() + ";" + record.getServiceId() + ";" + record.getDate());
             }
         }
         CsvManager.write(path, lines);

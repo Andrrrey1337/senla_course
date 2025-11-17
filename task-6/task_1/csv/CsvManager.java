@@ -8,9 +8,9 @@ public class CsvManager {
 
     public static List<List<String>> read(String filePath) {
         List<List<String>> lines = new ArrayList<>();
-        try (BufferedReader r = Files.newBufferedReader(Path.of(filePath))) {
+        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath))) {
             String line;
-            while ((line = r.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 lines.add(List.of(line.split(";")));
             }
         }
@@ -21,10 +21,10 @@ public class CsvManager {
     }
 
     public static void write(String filePath, List<String> lines) {
-        try (BufferedWriter w = Files.newBufferedWriter(Path.of(filePath))) {
+        try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath))) {
             for (String s : lines) {
-                w.write(s);
-                w.newLine();
+                writer.write(s);
+                writer.newLine();
             }
         }
         catch (IOException e) {
