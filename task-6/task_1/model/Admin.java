@@ -4,6 +4,7 @@ import task_1.IdGenerator.IdGenerator;
 import task_1.csv.CsvManager;
 import task_1.exceptions.HotelException;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -245,7 +246,11 @@ public class Admin {
         for (Guest guest : guestsById.values()) {
             lines.add(guest.getId() + ";" + guest.getName());
         }
-        CsvManager.write(filePath, lines);
+        try {
+            CsvManager.write(filePath, lines);
+        } catch (IOException e) {
+            throw new HotelException("Ошибка при экспорте гостей в файл: " + e.getMessage(), e);
+        }
     }
 
     public void importGuests(String filePath) throws HotelException {
@@ -273,7 +278,7 @@ public class Admin {
             }
             // чтобы новые автоматически сгенерированные id не конфликтовали с импортированными
             if (maxIdSeen > 0) IdGenerator.setNext(maxIdSeen + 1);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | IOException e) {
             throw new HotelException("Ошибка при импорте гостей из файла: " + e.getMessage(), e);
         }
     }
@@ -283,7 +288,11 @@ public class Admin {
         for (Service service : servicesById.values()) {
             lines.add(service.getId() + ";" + service.getName() + ";" + service.getPrice());
         }
-        CsvManager.write(path, lines);
+        try {
+            CsvManager.write(path, lines);
+        } catch (IOException e) {
+            throw new HotelException("Ошибка при экспорте услуг в файл: " + e.getMessage(), e);
+        }
     }
 
     public void importServices(String path) throws HotelException {
@@ -311,7 +320,7 @@ public class Admin {
                 }
             }
             if (maxId > 0) IdGenerator.setNext(maxId + 1);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | IOException e) {
             throw new HotelException("Ошибка при импорте услуг из файла: " + e.getMessage(), e);
         }
     }
@@ -323,7 +332,11 @@ public class Admin {
             lines.add(room.getId() + ";" + room.getNumber() + ";" + room.getPrice() + ";" + room.getCapacity() + ";" +
                     room.getStars() + ";" + room.getStatus() + ";" + guestId);
         }
-        CsvManager.write(path, lines);
+        try {
+            CsvManager.write(path, lines);
+        } catch (IOException e) {
+            throw new HotelException("Ошибка при экспорте комнат в файл: " + e.getMessage(), e);
+        }
     }
 
     public void importRooms(String path) throws HotelException {
@@ -384,7 +397,7 @@ public class Admin {
                 }
             }
             if (maxId > 0) IdGenerator.setNext(maxId + 1);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IOException e) {
             throw new HotelException("Ошибка при импорте комнат из файла: " + e.getMessage(), e);
         }
     }
@@ -396,7 +409,11 @@ public class Admin {
                 lines.add(record.getId() + ";" + record.getGuestId() + ";" + record.getServiceId() + ";" + record.getDate());
             }
         }
-        CsvManager.write(path, lines);
+        try {
+            CsvManager.write(path, lines);
+        } catch (IOException e) {
+            throw new HotelException("Ошибка при экспорте записей услуг в файл: " + e.getMessage(), e);
+        }
     }
 
     public void importServiceRecords(String path) throws HotelException {
@@ -427,7 +444,7 @@ public class Admin {
                 list.add(rec);
             }
             if (maxId > 0) IdGenerator.setNext(maxId + 1);
-        } catch (NumberFormatException | DateTimeParseException e) {
+        } catch (NumberFormatException | DateTimeParseException | IOException e) {
             throw new HotelException("Ошибка при импорте записей услуг из файла: " + e.getMessage(), e);
         }
     }

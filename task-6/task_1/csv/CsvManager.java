@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CsvManager {
 
-    public static List<List<String>> read(String filePath) {
+    public static List<List<String>> read(String filePath) throws IOException {
         List<List<String>> lines = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath))) {
             String line;
@@ -14,21 +14,15 @@ public class CsvManager {
                 lines.add(List.of(line.split(";")));
             }
         }
-        catch (IOException e) {
-            System.out.println("Ошибка чтения файла: " + e.getMessage());
-        }
         return lines;
     }
 
-    public static void write(String filePath, List<String> lines) {
+    public static void write(String filePath, List<String> lines) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Path.of(filePath))) {
             for (String s : lines) {
                 writer.write(s);
                 writer.newLine();
             }
-        }
-        catch (IOException e) {
-            System.out.println("Ошибка записи файла: " + e.getMessage());
         }
     }
 }
