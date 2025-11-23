@@ -1,7 +1,7 @@
-package task_1.model;
+package task_1_2.model;
 
 
-import task_1.config.ConfigManager;
+import task_1_2.config.ConfigManager;
 
 import java.io.Serializable;
 import java.time.LocalDate;

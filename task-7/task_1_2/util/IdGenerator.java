@@ -1,4 +1,4 @@
-package task_1.util;
+package task_1_2.util;
 
 import java.io.Serializable;
 

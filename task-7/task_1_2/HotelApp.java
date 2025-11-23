@@ -1,9 +1,9 @@
-package task_1;
+package task_1_2;
 
-import task_1.exceptions.HotelException;
-import task_1.model.Admin;
-import task_1.util.StateManager;
-import task_1.view.MenuController;
+import task_1_2.exceptions.HotelException;
+import task_1_2.model.Admin;
+import task_1_2.util.StateManager;
+import task_1_2.view.MenuController;
 
 public class HotelApp {
     public static void main(String[] args) {

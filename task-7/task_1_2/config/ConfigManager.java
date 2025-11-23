@@ -1,4 +1,4 @@
-package task_1.config;
+package task_1_2.config;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,7 +6,7 @@ import java.util.Properties;
 
 public class ConfigManager {
 
-    private static final String CONFIG_FILE_PATH = "/task_1/resources/hotel.properties";
+    private static final String CONFIG_FILE_PATH = "/task_1_2/resources/hotel.properties";
     private static ConfigManager instance;
     private final Properties properties;
 

@@ -1,7 +1,7 @@
-package task_1.util;
+package task_1_2.util;
 
-import task_1.exceptions.HotelException;
-import task_1.model.Admin; // Импортируем Admin
+import task_1_2.exceptions.HotelException;
+import task_1_2.model.Admin; // Импортируем Admin
 import java.io.*;
 import java.nio.file.Paths;
 

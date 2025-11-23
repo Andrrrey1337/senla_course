@@ -1,9 +1,9 @@
-package task_1.model;
+package task_1_2.model;
 
-import task_1.config.ConfigManager;
-import task_1.util.IdGenerator;
-import task_1.util.CsvManager;
-import task_1.exceptions.HotelException;
+import task_1_2.config.ConfigManager;
+import task_1_2.util.IdGenerator;
+import task_1_2.util.CsvManager;
+import task_1_2.exceptions.HotelException;
 
 import java.io.IOException;
 import java.io.Serializable;

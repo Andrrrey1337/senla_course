@@ -1,4 +1,4 @@
-package task_1.model;
+package task_1_2.model;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package task_1.exceptions;
+package task_1_2.exceptions;
 
 public class HotelException extends Exception {
     public HotelException(String message) {

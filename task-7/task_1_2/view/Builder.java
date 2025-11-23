@@ -1,8 +1,8 @@
-package task_1.view;
+package task_1_2.view;
 
-import task_1.model.*;
-import task_1.exceptions.HotelException;
-import task_1.util.StateManager;
+import task_1_2.model.*;
+import task_1_2.exceptions.HotelException;
+import task_1_2.util.StateManager;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
