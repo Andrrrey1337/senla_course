@@ -457,7 +457,7 @@ public class Admin {
                     list.remove(exists);
                 }
                 ServiceRecord rec = new ServiceRecord(id, guestId, serviceId, date);
-                list.add(rec);
+                serviceRecordsByGuestId.get(guestId).add(rec);
             }
             if (maxId > 0) IdGenerator.setNext(maxId + 1);
         } catch (NumberFormatException | DateTimeParseException | IOException e) {

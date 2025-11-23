@@ -17,7 +17,7 @@ public class ServiceRecord {
         this.date = date;
     }
 
-    public ServiceRecord(long id, Long serviceId, Long guestId, LocalDate date) {
+    public ServiceRecord(long id,  Long guestId, Long serviceId, LocalDate date) {
         this.id = id;
         this.guestId = guestId;
         this.serviceId = serviceId;
