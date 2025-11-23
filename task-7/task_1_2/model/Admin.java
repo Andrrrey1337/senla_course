@@ -1,15 +1,17 @@
 package task_1.model;
 
-import task_1.IdGenerator.IdGenerator;
-import task_1.csv.CsvManager;
+import task_1.config.ConfigManager;
+import task_1.util.IdGenerator;
+import task_1.util.CsvManager;
 import task_1.exceptions.HotelException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
-public class Admin {
+public class Admin implements Serializable {
     private static Admin instance;
     private final Map<Integer, Room> rooms = new HashMap<>();
     private final Map<String, Service> servicesByName = new HashMap<>();
@@ -17,6 +19,15 @@ public class Admin {
     private final Map<Long, List<ServiceRecord>> serviceRecordsByGuestId = new HashMap<>();
     private final Map<String, Guest> guestsByName = new HashMap<>();
     private final Map<Long, Guest> guestsById = new HashMap<>();
+    private final IdGenerator idGeneratorState = new IdGenerator();
+
+    private Admin() {}
+
+    public static void setInstanceForLoading(Admin loadedAdmin) {
+        if (instance == null) {
+            instance = loadedAdmin;
+        }
+    }
 
     public static Admin getInstance() {
         if (instance == null) {
@@ -32,7 +43,7 @@ public class Admin {
         if (guestsByName.containsKey(name)){
             return guestsByName.get(name);
         }
-        Guest guest = new Guest(name);
+        Guest guest = new Guest(idGeneratorState.next(), name);
         guestsByName.put(name,guest);
         guestsById.put(guest.getId(), guest);
         return guest;
@@ -43,12 +54,9 @@ public class Admin {
             throw new HotelException("Услуга с названием '" + serviceName + "' не найдена");
         }
         Guest guest = createOrFindGuest(guestName);
-        List<ServiceRecord> records = serviceRecordsByGuestId.get(guest.getId());
-        if (records == null) {
-            records = new ArrayList<>();
-            serviceRecordsByGuestId.put(guest.getId(), records);
-        }
-        records.add(new ServiceRecord(guestsByName.get(guestName).getId(), servicesByName.get(serviceName).getId(), date));
+        List<ServiceRecord> records = serviceRecordsByGuestId.computeIfAbsent(guest.getId(), k -> new ArrayList<>());
+        records.add(new ServiceRecord(idGeneratorState.next(), guest.getId(), servicesByName.get(serviceName).getId(), date));
+
     }
 
     public void checkIn(int number, String guestName, LocalDate checkInDate, LocalDate checkOutDate) throws HotelException {
@@ -84,6 +92,13 @@ public class Admin {
     }
 
     public void setRoomStatus(int number, RoomStatus status) throws HotelException {
+        try {
+            if (!ConfigManager.getInstance().isRoomStatusChangeEnabled()) {
+                throw new HotelException("Возможность изменять статус номера отключена в конфигурации.");
+            }
+        } catch (IOException e) { // Обработка возможной ошибки при загрузке конфига
+            throw new HotelException("Ошибка при загрузке конфигурации: " + e.getMessage(), e);
+        }
         Room room = rooms.get(number);
         if (room == null) {
             throw new HotelException("Комната с номером " + number + " не найдена");
@@ -120,7 +135,7 @@ public class Admin {
         if (rooms.containsKey(number)) {
             throw new HotelException("Комната с номером " + number + " уже существует");
         }
-        rooms.put(number, new Room(number, price, capacity, stars));
+        rooms.put(number, new Room(idGeneratorState.next(), number, price, capacity, stars));
     }
 
     public void addService(String name, double price) throws HotelException {
@@ -133,7 +148,7 @@ public class Admin {
         if (servicesByName.containsKey(name)) {
             throw new HotelException("Услуга с названием '" + name + "' уже существует");
         }
-        Service service = new Service(name, price);
+        Service service = new Service(idGeneratorState.next(), name, price);
         servicesByName.put(name, service);
         servicesById.put(service.getId(), service);
     }
@@ -277,7 +292,7 @@ public class Admin {
                 }
             }
             // чтобы новые автоматически сгенерированные id не конфликтовали с импортированными
-            if (maxIdSeen > 0) IdGenerator.setNext(maxIdSeen + 1);
+            if (maxIdSeen > 0) idGeneratorState.setNext(maxIdSeen + 1);
         } catch (NumberFormatException | IOException e) {
             throw new HotelException("Ошибка при импорте гостей из файла: " + e.getMessage(), e);
         }
@@ -319,7 +334,7 @@ public class Admin {
                     servicesByName.put(name, service);
                 }
             }
-            if (maxId > 0) IdGenerator.setNext(maxId + 1);
+            if (maxId > 0) idGeneratorState.setNext(maxId + 1);
         } catch (NumberFormatException | IOException e) {
             throw new HotelException("Ошибка при импорте услуг из файла: " + e.getMessage(), e);
         }
@@ -412,7 +427,7 @@ public class Admin {
                 }
             }
 
-            if (maxId > 0) IdGenerator.setNext(maxId + 1);
+            if (maxId > 0) idGeneratorState.setNext(maxId + 1);
         } catch (IllegalArgumentException | IOException e) {
             throw new HotelException("Ошибка при импорте комнат из файла: " + e.getMessage(), e);
         }
@@ -459,7 +474,7 @@ public class Admin {
                 ServiceRecord rec = new ServiceRecord(id, guestId, serviceId, date);
                 serviceRecordsByGuestId.get(guestId).add(rec);
             }
-            if (maxId > 0) IdGenerator.setNext(maxId + 1);
+            if (maxId > 0) idGeneratorState.setNext(maxId + 1);
         } catch (NumberFormatException | DateTimeParseException | IOException e) {
             throw new HotelException("Ошибка при импорте записей услуг из файла: " + e.getMessage(), e);
         }

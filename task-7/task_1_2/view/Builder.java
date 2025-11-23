@@ -2,6 +2,8 @@ package task_1.view;
 
 import task_1.model.*;
 import task_1.exceptions.HotelException;
+import task_1.util.StateManager;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
@@ -49,7 +51,16 @@ public class Builder {
                 new MenuItem("Импорт комнат (CSV)", this::importRooms),
                 new MenuItem("Экспорт записей услуг (CSV)", this::exportServiceRecords),
                 new MenuItem("Импорт записей услуг (CSV)", this::importServiceRecords),
-                new MenuItem("Выход", () -> System.exit(0))
+                new MenuItem("Выход", () -> {
+                    try {
+                        System.out.println("\nСохранение состояния перед завершением...");
+                        StateManager.saveState(Admin.getInstance());
+                    } catch (HotelException e) {
+                        System.err.println("Ошибка при сохранении состояния: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                    System.exit(0); // Теперь завершаем JVM
+                })
         );
     }
 

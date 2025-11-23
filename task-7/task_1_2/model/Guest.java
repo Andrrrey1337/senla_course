@@ -1,15 +1,11 @@
 package task_1.model;
 
-import task_1.IdGenerator.IdGenerator;
+import java.io.Serializable;
 
-public class Guest {
+public class Guest implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final long id;
     private String name;
-
-    public Guest(String name) {
-        this.id = IdGenerator.next();
-        this.name = name;
-    }
 
     public Guest(long id, String name) {
         this.id = id;
