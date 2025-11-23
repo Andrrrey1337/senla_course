@@ -338,6 +338,47 @@ public class Admin {
             throw new HotelException("Ошибка при экспорте комнат в файл: " + e.getMessage(), e);
         }
     }
+    private void updateExistingRoomById(Room foundById, long id,int number,double price,int capacity,int stars,
+                                        RoomStatus status, long guestId, LocalDate checkInDate,LocalDate checkOutDate) {
+        int oldNumber = foundById.getNumber();
+        foundById.setNumber(number);
+        foundById.setPrice(price);
+        foundById.setCapacity(capacity);
+        foundById.setStars(stars);
+        foundById.setStatus(status);
+        foundById.setCheckInDate(checkInDate);
+        foundById.setCheckOutDate(checkOutDate);
+        foundById.setGuest(guestsById.getOrDefault(guestId, null));
+        if (oldNumber != number) {
+            rooms.put(number, foundById);
+            rooms.remove(oldNumber);
+        }
+    }
+
+    private void updateOrCreateRoomByNumber( long id,int number,double price,int capacity,int stars,
+                                             RoomStatus status, long guestId, LocalDate checkInDate,LocalDate checkOutDate) {
+        // если номер занят другой комнатой
+        if (rooms.containsKey(number)) {
+            // если номер уже существует, обновим существующую комнату
+            Room rExist = rooms.get(number);
+            rExist.setPrice(price);
+            rExist.setCapacity(capacity);
+            rExist.setStars(stars);
+            rExist.setStatus(status);
+            rExist.setCheckInDate(checkInDate);
+            rExist.setCheckOutDate(checkOutDate);
+            if (guestsById.containsKey(guestId)) {
+                rExist.setGuest(guestsById.get(guestId));
+            }
+        } else {
+            // создать новую комнату с указанным id
+            Room room = new Room(id, number, price, capacity, stars, status, checkInDate, checkOutDate);
+            if (guestsById.containsKey(guestId)) {
+                room.setGuest(guestsById.get(guestId));
+            }
+            rooms.put(number, room);
+        }
+    }
 
     public void importRooms(String path) throws HotelException {
         try {
@@ -352,50 +393,25 @@ public class Admin {
                 int stars = Integer.parseInt(c.get(4));
                 RoomStatus status = RoomStatus.valueOf(c.get(5));
                 long guestId = Long.parseLong(c.get(6));
+                LocalDate checkInDate = c.size() > 7 ? LocalDate.parse(c.get(7)) : null;
+                LocalDate checkOutDate = c.size() > 7 ? LocalDate.parse(c.get(8)) : null;
+
                 maxId = Math.max(maxId, id);
                 // найти комнату с таким id
                 Room foundById = rooms.values().stream()
                         .filter(room -> room.getId() == id)
                         .findFirst()
                         .orElse(null);
+
                 if (foundById != null) {
-                    int oldNumber = foundById.getNumber();
-                    foundById.setNumber(number);
-                    foundById.setPrice(price);
-                    foundById.setCapacity(capacity);
-                    foundById.setStars(stars);
-                    foundById.setStatus(status);
-                    if (guestsById.containsKey(guestId)) {
-                        foundById.setGuest(guestsById.get(guestId));
-                    } else {
-                        foundById.setGuest(null);
-                    }
-                    if (oldNumber != number) {
-                        rooms.put(number, foundById);
-                        rooms.remove(oldNumber);
-                    }
+                    updateExistingRoomById(foundById, id, number, price, capacity, stars, status,
+                            guestId, checkInDate, checkOutDate);
                 } else {
-                    // если номер занят другой комнатой
-                    if (rooms.containsKey(number)) {
-                        // если номер уже существует, обновим существующую комнату
-                        Room rExist = rooms.get(number);
-                        rExist.setPrice(price);
-                        rExist.setCapacity(capacity);
-                        rExist.setStars(stars);
-                        rExist.setStatus(status);
-                        if (guestsById.containsKey(guestId)) {
-                            rExist.setGuest(guestsById.get(guestId));
-                        }
-                    } else {
-                        // создать новую комнату с указанным id
-                        Room room = new Room(id, number, price, capacity, stars, status);
-                        if (guestsById.containsKey(guestId)) {
-                            room.setGuest(guestsById.get(guestId));
-                        }
-                        rooms.put(number, room);
-                    }
+                    updateOrCreateRoomByNumber(id, number, price, capacity, stars, status, guestId,
+                            checkInDate, checkOutDate);
                 }
             }
+
             if (maxId > 0) IdGenerator.setNext(maxId + 1);
         } catch (IllegalArgumentException | IOException e) {
             throw new HotelException("Ошибка при импорте комнат из файла: " + e.getMessage(), e);

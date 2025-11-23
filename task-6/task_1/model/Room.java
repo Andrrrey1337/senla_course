@@ -37,6 +37,18 @@ public class Room {
         this.stars = stars;
     }
 
+    public Room(long id, int number, double price, int capacity, int stars, RoomStatus status, LocalDate checkInDate,
+                LocalDate checkOutDate) {
+        this.id = id;
+        this.number = number;
+        this.price = price;
+        this.status = status;
+        this.capacity = capacity;
+        this.stars = stars;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+    }
+
     public double calculatePayment() {
         if (checkInDate != null && checkOutDate != null) {
             return price * java.time.temporal.ChronoUnit.DAYS.between(checkInDate, checkOutDate);
