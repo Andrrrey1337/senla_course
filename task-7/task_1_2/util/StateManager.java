@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 public class StateManager {
 
-    private static final String SERIALIZATION_FILE_PATH = "task-7/task_1/resources/hotel_state.ser";
+    private static final String SERIALIZATION_FILE_PATH = "task-7/task_1_2/resources/hotel_state.ser";
 
     public static void saveState(Admin admin) throws HotelException {
         try (ObjectOutputStream object = new ObjectOutputStream(new FileOutputStream(SERIALIZATION_FILE_PATH))) {
