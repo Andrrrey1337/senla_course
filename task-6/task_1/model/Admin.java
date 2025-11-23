@@ -330,7 +330,7 @@ public class Admin {
         for (Room room : rooms.values()) {
             long guestId = room.getGuest() != null ? room.getGuest().getId() : 0;
             lines.add(room.getId() + ";" + room.getNumber() + ";" + room.getPrice() + ";" + room.getCapacity() + ";" +
-                    room.getStars() + ";" + room.getStatus() + ";" + guestId);
+                    room.getStars() + ";" + room.getStatus() + ";" + guestId + ";" + room.getCheckInDate() + ";" + room.getCheckOutDate());
         }
         try {
             CsvManager.write(path, lines);
