@@ -257,6 +257,9 @@ public class Admin implements Serializable {
     }
 
     public void exportGuests(String filePath) throws HotelException {
+        if (guestsById.isEmpty()) {
+            throw new HotelException("Невозможно экспортировать гостей: список гостей пуст");
+        }
         List<String> lines = new ArrayList<>();
         for (Guest guest : guestsById.values()) {
             lines.add(guest.getId() + ";" + guest.getName());
@@ -299,6 +302,9 @@ public class Admin implements Serializable {
     }
 
     public void exportServices(String path) throws HotelException {
+        if (servicesById.isEmpty()) {
+            throw new HotelException("Невозможно экспортировать услуги: список услуг пуст");
+        }
         List<String> lines = new ArrayList<>();
         for (Service service : servicesById.values()) {
             lines.add(service.getId() + ";" + service.getName() + ";" + service.getPrice());
@@ -341,6 +347,9 @@ public class Admin implements Serializable {
     }
 
     public void exportRooms(String path) throws HotelException {
+        if (rooms.isEmpty()) {
+            throw new HotelException("Невозможно экспортировать комнаты: список комнат пуст");
+        }
         List<String> lines = new ArrayList<>();
         for (Room room : rooms.values()) {
             long guestId = room.getGuest() != null ? room.getGuest().getId() : 0;
@@ -434,6 +443,9 @@ public class Admin implements Serializable {
     }
 
     public void exportServiceRecords(String path) throws HotelException {
+        if (serviceRecordsByGuestId.isEmpty()) {
+            throw new HotelException("Невозможно экспортировать записи услуг: список записей пуст");
+        }
         List<String> lines = new ArrayList<>();
         for (Map.Entry<Long, List<ServiceRecord>> e : serviceRecordsByGuestId.entrySet()) {
             for (ServiceRecord record : e.getValue()) {
