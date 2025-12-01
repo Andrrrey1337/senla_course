@@ -1,4 +1,4 @@
-package task_1_2.model;
+package model;
 
 public enum RoomStatus {
     AVAILABLE, OCCUPIED, REPAIR

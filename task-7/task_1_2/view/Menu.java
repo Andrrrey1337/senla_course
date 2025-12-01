@@ -1,4 +1,4 @@
-package task_1_2.view;
+package view;
 
 public class Menu {
     private String name;

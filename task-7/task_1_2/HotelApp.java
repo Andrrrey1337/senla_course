@@ -1,18 +1,17 @@
-package task_1_2;
-
-import task_1_2.exceptions.HotelException;
-import task_1_2.model.Admin;
-import task_1_2.util.StateManager;
-import task_1_2.view.MenuController;
+import exceptions.HotelException;
+import model.HotelService;
+import util.StateManager;
+import view.MenuController;
 
 public class HotelApp {
+    private static final StateManager stateManager = new StateManager();
     public static void main(String[] args) {
         System.out.println("Система управления отелем");
 
         try {
-            Admin loadedAdmin = StateManager.loadState();
-            if (loadedAdmin != null) {
-                Admin.setInstanceForLoading(loadedAdmin);
+            HotelService loadedHotelService = stateManager.loadState();
+            if (loadedHotelService != null) {
+                HotelService.setInstanceForLoading(loadedHotelService);
             }
 
             new MenuController().run();

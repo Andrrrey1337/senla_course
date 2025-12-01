@@ -1,35 +1,38 @@
-package task_1_2.util;
+package util;
 
-import task_1_2.exceptions.HotelException;
-import task_1_2.model.Admin; // Импортируем Admin
+import exceptions.HotelException;
+import model.HotelService;
 import java.io.*;
 import java.nio.file.Paths;
 
 public class StateManager {
 
-    private static final String SERIALIZATION_FILE_PATH = "task-7/task_1_2/resources/hotel_state.ser";
+    private final String SERIALIZATION_FILE_PATH = StateManager.class.getResource("/hotel_state.ser").getPath();
 
-    public static void saveState(Admin admin) throws HotelException {
+    public void saveState(HotelService hotelService) throws HotelException {
         try (ObjectOutputStream object = new ObjectOutputStream(new FileOutputStream(SERIALIZATION_FILE_PATH))) {
-            object.writeObject(admin);
+            object.writeObject(hotelService);
             System.out.println("Состояние программы сохранено в " + Paths.get(SERIALIZATION_FILE_PATH).toAbsolutePath());
         } catch (IOException e) {
             throw new HotelException("Ошибка при сохранении состояния: " + e.getMessage(), e);
         }
     }
 
-    public static Admin loadState() throws HotelException {
+    public HotelService loadState() throws HotelException {
         File file = new File(SERIALIZATION_FILE_PATH);
-        if (!file.exists()) {
-            System.out.println("Файл состояния не найден (" + file.getAbsolutePath() + "). Инициализация новой системы");
-            return null;
+        if (!file.exists() || file.length() == 0) {
+            System.out.println("Файл состояния не найден или он пуст (" + file.getAbsolutePath() + "). Создание нового файла с начальным состоянием.");
+            HotelService initialService = HotelService.getInstance();
+            saveState(initialService);
+            System.out.println("Новый файл состояния создан");
+            return initialService;
         }
 
         try (ObjectInputStream object = new ObjectInputStream(new FileInputStream(SERIALIZATION_FILE_PATH))) {
-            Admin loadedAdmin = (Admin) object.readObject();
+            HotelService loadedHotelService = (HotelService) object.readObject();
             System.out.println("Состояние программы загружено из " + file.getAbsolutePath());
 
-            return loadedAdmin;
+            return loadedHotelService;
         } catch (IOException | ClassNotFoundException e) {
             throw new HotelException("Ошибка при загрузке состояния: " + e.getMessage(), e);
         }

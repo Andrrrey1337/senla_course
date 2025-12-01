@@ -1,7 +1,7 @@
-package task_1_2.model;
+package model;
 
 
-import task_1_2.config.ConfigManager;
+import config.ConfigManager;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -49,6 +49,7 @@ public class Room implements Serializable {
         try {
             this.maxHistorySize = ConfigManager.getInstance().getRoomResidenceHistorySize();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             System.err.println("Не удалось загрузить конфигурацию, используется значение по умолчанию для размера истории");
             this.maxHistorySize = 3;
         }

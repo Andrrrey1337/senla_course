@@ -1,4 +1,4 @@
-package task_1_2.util;
+package util;
 
 import java.io.*;
 import java.nio.file.*;

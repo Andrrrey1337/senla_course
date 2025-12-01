@@ -1,8 +1,8 @@
-package task_1_2.view;
+package view;
 
-import task_1_2.model.*;
-import task_1_2.exceptions.HotelException;
-import task_1_2.util.StateManager;
+import model.*;
+import exceptions.HotelException;
+import util.StateManager;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -11,8 +11,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Builder {
+    private static final StateManager stateManager = new StateManager();
     private static Scanner scanner = new Scanner(System.in);
-    private Admin admin = Admin.getInstance();
+    private HotelService hotelService = HotelService.getInstance();
 
     public Menu buildRootMenu() {
         return new Menu("Главное меню",
@@ -54,7 +55,7 @@ public class Builder {
                 new MenuItem("Выход", () -> {
                     try {
                         System.out.println("\nСохранение состояния перед завершением...");
-                        StateManager.saveState(Admin.getInstance());
+                        stateManager.saveState(HotelService.getInstance());
                     } catch (HotelException e) {
                         System.err.println("Ошибка при сохранении состояния: " + e.getMessage());
                         e.printStackTrace();
@@ -75,7 +76,7 @@ public class Builder {
         int stars = getIntInput();
 
         try {
-            admin.addRoom(number, price, capacity, stars);
+            hotelService.addRoom(number, price, capacity, stars);
             System.out.println("Комната с номером: " + number + " и стоимостью: " + price + " добавлена");
         } catch (HotelException e) {
             System.out.println("Ошибка при добавлении комнаты: " + e.getMessage());
@@ -89,7 +90,7 @@ public class Builder {
         double price = getDoubleInput();
 
         try {
-            admin.addService(name, price);
+            hotelService.addService(name, price);
             System.out.println("Добавлена услуга с названием: " + name + " и стоимостью: " + price);
         } catch (HotelException e) {
             System.out.println("Ошибка при добавлении услуги: " + e.getMessage());
@@ -107,7 +108,7 @@ public class Builder {
             System.out.print("Введите дату выселения (YYYY-MM-DD): ");
             LocalDate checkOut = LocalDate.parse(scanner.nextLine());
 
-            admin.checkIn(number, name, checkIn, checkOut);
+            hotelService.checkIn(number, name, checkIn, checkOut);
             System.out.println("Гость: " + name + " заселен в номер: " + number);
 
         } catch (DateTimeParseException e) {
@@ -122,7 +123,7 @@ public class Builder {
         int number = getIntInput();
 
         try {
-            admin.checkOut(number);
+            hotelService.checkOut(number);
             System.out.println("Гость выселен из номера: " + number);
         } catch (HotelException e) {
             System.out.println("Ошибка при выселении: " + e.getMessage());
@@ -138,7 +139,7 @@ public class Builder {
         LocalDate date = LocalDate.parse(scanner.nextLine());
 
         try {
-            admin.orderService(name, service, date);
+            hotelService.orderService(name, service, date);
             System.out.println("Услуга " + service + " успешно заказана");
         } catch (DateTimeParseException e) {
             System.out.println("Неверный формат даты. Используйте YYYY-MM-DD.");
@@ -165,7 +166,7 @@ public class Builder {
         }
 
         try {
-            admin.setRoomStatus(number, status);
+            hotelService.setRoomStatus(number, status);
             System.out.println("Статус номера: " + number + " изменен на: " + status);
         } catch (HotelException e) {
             System.out.println("Ошибка при изменении статуса комнаты: " + e.getMessage());
@@ -179,7 +180,7 @@ public class Builder {
         double price = getDoubleInput();
 
         try {
-            admin.updatePriceRoom(number, price);
+            hotelService.updatePriceRoom(number, price);
             System.out.println("Стоимость номера " + number + " изменена на: " + price);
         } catch (HotelException e) {
             System.out.println("Ошибка при обновлении цены комнаты: " + e.getMessage());
@@ -193,7 +194,7 @@ public class Builder {
         double price = getDoubleInput();
 
         try {
-            admin.updatePriceService(name, price);
+            hotelService.updatePriceService(name, price);
             System.out.println("Стоимость услуги: " + name + " изменена на: " + price);
         } catch (HotelException e) {
             System.out.println("Ошибка при обновлении цены услуги: " + e.getMessage());
@@ -202,56 +203,56 @@ public class Builder {
 
     private void printAllRooms() {
         System.out.println("Все номера в отеле:");
-        for (Room room : admin.getAllRooms()) {
+        for (Room room : hotelService.getAllRooms()) {
             System.out.println(room);
         }
     }
 
     private void printAllServices() {
         System.out.println("Все предоставляемые услуги:");
-        for (Service service : admin.getAllServices()) {
+        for (Service service : hotelService.getAllServices()) {
             System.out.println(service);
         }
     }
 
     private void printSortedRoomsByPrice() {
         System.out.println("Номера отсортированы по цене:");
-        for (Room room : admin.getSortedRooms(Comparator.comparingDouble(Room::getPrice))) {
+        for (Room room : hotelService.getSortedRooms(Comparator.comparingDouble(Room::getPrice))) {
             System.out.println(room);
         }
     }
 
     private void printSortedRoomsByCapacity() {
         System.out.println("Номера отсортированы вместительности:");
-        for (Room room : admin.getSortedRooms(Comparator.comparingInt(Room::getCapacity))) {
+        for (Room room : hotelService.getSortedRooms(Comparator.comparingInt(Room::getCapacity))) {
             System.out.println(room);
         }
     }
 
     private void printSortedRoomsByStars() {
         System.out.println("Номера отсортированы по звездам:");
-        for (Room room : admin.getSortedRooms(Comparator.comparingInt(Room::getStars))) {
+        for (Room room : hotelService.getSortedRooms(Comparator.comparingInt(Room::getStars))) {
             System.out.println(room);
         }
     }
 
     private void printAvailableSortedRoomsByPrice() {
         System.out.println("Свободные номера(отсортированы по цене):");
-        for (Room room : admin.getAvailableRooms(Comparator.comparingDouble(Room::getPrice))) {
+        for (Room room : hotelService.getAvailableRooms(Comparator.comparingDouble(Room::getPrice))) {
             System.out.println(room);
         }
     }
 
     private void printAvailableSortedRoomsByCapacity() {
         System.out.println("Свободные номера(отсортированы по вместительности):");
-        for (Room room : admin.getAvailableRooms(Comparator.comparingInt(Room::getCapacity))) {
+        for (Room room : hotelService.getAvailableRooms(Comparator.comparingInt(Room::getCapacity))) {
             System.out.println(room);
         }
     }
 
     private void printAvailableSortedRoomsByStars() {
         System.out.println("Свободные номера(отсортированы по звездам):");
-        for (Room room : admin.getAvailableRooms(Comparator.comparingInt(Room::getStars))) {
+        for (Room room : hotelService.getAvailableRooms(Comparator.comparingInt(Room::getStars))) {
             System.out.println(room);
         }
     }
@@ -261,7 +262,7 @@ public class Builder {
             System.out.print("Введите дату (YYYY-MM-DD): ");
             LocalDate date = LocalDate.parse(scanner.nextLine());
             System.out.println("Номера свободные к " + date + ":");
-            for (Room room : admin.getRoomAvailableByDate(date)) {
+            for (Room room : hotelService.getRoomAvailableByDate(date)) {
                 System.out.println("Номер: " + room.getNumber());
             }
         } catch (DateTimeParseException e) {
@@ -271,25 +272,25 @@ public class Builder {
 
     private void printGuestsByAlphabet() {
         System.out.println("Список постояльцев(отсортирован по алфавиту):");
-        for (Room room : admin.getGuests(Comparator.comparing(room -> room.getGuest().getName()))) {
+        for (Room room : hotelService.getGuests(Comparator.comparing(room -> room.getGuest().getName()))) {
             System.out.println(room.getGuest().getName() + " выселится " + room.getCheckOutDate() + " из номера " + room.getNumber());
         }
     }
 
     private void printGuestsByCheckOutDate() {
         System.out.println("Список постояльцев(отсортирован по дате выселения):");
-        for (Room room : admin.getGuests(Comparator.comparing(Room::getCheckOutDate))) {
+        for (Room room : hotelService.getGuests(Comparator.comparing(Room::getCheckOutDate))) {
             System.out.println(room.getGuest().getName() + " выселится " + room.getCheckOutDate() + " из номера " + room.getNumber());
         }
     }
 
     private void printCountAvailableRooms() {
-        long count = admin.getCountAvailableRooms();
+        long count = hotelService.getCountAvailableRooms();
         System.out.println("Всего свободных номеров: " + count);
     }
 
     private void printCountGuests() {
-        long count = admin.getCountGuests();
+        long count = hotelService.getCountGuests();
         System.out.println("Всего жильцов: " + count);
     }
 
@@ -297,14 +298,14 @@ public class Builder {
         System.out.print("Введите имя гостя: ");
         String name = scanner.nextLine();
         try {
-            List<ServiceRecord> records = admin.getGuestServicesSortedByPrice(name);
+            List<ServiceRecord> records = hotelService.getGuestServicesSortedByPrice(name);
             if (records.isEmpty()) {
                 System.out.println("У гостя " + name + " нет заказанных услуг");
                 return;
             }
             System.out.println("Список услуг постояльца " + name + ", отсортированный по цене:");
             for (ServiceRecord record : records) {
-                Service service = admin.getAllServices().stream()
+                Service service = hotelService.getAllServices().stream()
                         .filter(s -> s.getId() == record.getServiceId())
                         .findFirst()
                         .orElse(null);
@@ -321,14 +322,14 @@ public class Builder {
         System.out.print("Введите имя гостя: ");
         String name = scanner.nextLine();
         try {
-            List<ServiceRecord> records = admin.getGuestServicesSortedByDate(name);
+            List<ServiceRecord> records = hotelService.getGuestServicesSortedByDate(name);
             if (records.isEmpty()) {
                 System.out.println("У гостя " + name + " нет заказанных услуг");
                 return;
             }
             System.out.println("Список услуг постояльца " + name + ", отсортированный по дате:");
             for (ServiceRecord record : records) {
-                Service service = admin.getAllServices().stream()
+                Service service = hotelService.getAllServices().stream()
                         .filter(s -> s.getId() == record.getServiceId())
                         .findFirst()
                         .orElse(null);
@@ -344,14 +345,14 @@ public class Builder {
     private void printPaymentForRoom() {
         System.out.print("Введите номер комнаты: ");
         int number = getIntInput();
-        double payment = admin.getPaymentForRoom(number);
+        double payment = hotelService.getPaymentForRoom(number);
         System.out.println("Сумма к оплате за номер " + number + ": " + payment);
     }
 
     private void printThreeLastGuests() {
         System.out.print("Введите номер комнаты: ");
         int number = getIntInput();
-        List<Residence> history = admin.getThreeLastGuests(number);
+        List<Residence> history = hotelService.getThreeLastGuests(number);
         System.out.println("Последние 3 постояльца номера " + number + ":");
         for (Residence residence : history) {
             System.out.println(residence.getGuest());
@@ -360,11 +361,11 @@ public class Builder {
 
     private void printAllPrices() {
         System.out.println("Цены на номера:");
-        for (Room room : admin.getAllRoomsSortedByPrice()) {
+        for (Room room : hotelService.getAllRoomsSortedByPrice()) {
             System.out.println("Номер " + room.getNumber() + " стоит " + room.getPrice());
         }
         System.out.println("Цены услуг:");
-        for (Service service : admin.getAllServicesSortedByPrice()) {
+        for (Service service : hotelService.getAllServicesSortedByPrice()) {
             System.out.println("Услуга " + service.getName() + " стоит " + service.getPrice());
         }
     }
@@ -373,7 +374,7 @@ public class Builder {
         System.out.print("Введите номер комнаты: ");
         int number = getIntInput();
         try {
-            Room room = admin.getRoomDetails(number);
+            Room room = hotelService.getRoomDetails(number);
             System.out.println(room);
         } catch (HotelException e) {
             System.out.println("Ошибка при получении деталей комнаты: " + e.getMessage());
@@ -384,7 +385,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для экспорта данных о гостях: ");
         String path = scanner.nextLine();
         try {
-            admin.exportGuests(path);
+            hotelService.exportGuests(path);
             System.out.println("Данные о гостях успешно экспортированы в " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при экспорте гостей: " + e.getMessage());
@@ -395,7 +396,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для импорта данных о гостях: ");
         String path = scanner.nextLine();
         try {
-            admin.importGuests(path);
+            hotelService.importGuests(path);
             System.out.println("Данные о гостях успешно импортированы из " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при импорте гостей: " + e.getMessage());
@@ -406,7 +407,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для экспорта данных об услугах: ");
         String path = scanner.nextLine();
         try {
-            admin.exportServices(path);
+            hotelService.exportServices(path);
             System.out.println("Данные об услугах успешно экспортированы в " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при экспорте услуг: " + e.getMessage());
@@ -417,7 +418,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для импорта данных об услугах: ");
         String path = scanner.nextLine();
         try {
-            admin.importServices(path);
+            hotelService.importServices(path);
             System.out.println("Данные об услугах успешно импортированы из " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при импорте услуг: " + e.getMessage());
@@ -428,7 +429,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для экспорта данных о номерах: ");
         String path = scanner.nextLine();
         try {
-            admin.exportRooms(path);
+            hotelService.exportRooms(path);
             System.out.println("Данные о номерах успешно экспортированы в " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при экспорте номеров: " + e.getMessage());
@@ -439,7 +440,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для импорта данных о номерах: ");
         String path = scanner.nextLine();
         try {
-            admin.importRooms(path);
+            hotelService.importRooms(path);
             System.out.println("Данные о номерах успешно импортированы из " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при импорте номеров: " + e.getMessage());
@@ -450,7 +451,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для экспорта данных о записях услуг: ");
         String path = scanner.nextLine();
         try {
-            admin.exportServiceRecords(path);
+            hotelService.exportServiceRecords(path);
             System.out.println("Данные о записях услуг успешно экспортированы в " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при экспорте записей услуг: " + e.getMessage());
@@ -461,7 +462,7 @@ public class Builder {
         System.out.print("Введите путь файла CSV для импорта данных о записях услуг: ");
         String path = scanner.nextLine();
         try {
-            admin.importServiceRecords(path);
+            hotelService.importServiceRecords(path);
             System.out.println("Данные о записях услуг успешно импортированы из " + path);
         } catch (HotelException e) {
             System.out.println("Ошибка при импорте записей услуг: " + e.getMessage());
