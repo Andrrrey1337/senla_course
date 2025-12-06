@@ -1,6 +1,9 @@
-package model;
+package service.managers;
 
 import exceptions.HotelException;
+import model.Guest;
+import model.Service;
+import model.ServiceRecord;
 import util.IdGenerator;
 
 import java.io.Serializable;

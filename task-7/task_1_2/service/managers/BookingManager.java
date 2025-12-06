@@ -1,6 +1,9 @@
-package model;
+package service.managers;
 
 import exceptions.HotelException;
+import model.Guest;
+import model.Room;
+import model.RoomStatus;
 
 import java.io.Serializable;
 import java.time.LocalDate;

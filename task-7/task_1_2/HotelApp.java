@@ -1,5 +1,5 @@
 import exceptions.HotelException;
-import model.HotelService;
+import service.HotelService;
 import util.StateManager;
 import view.MenuController;
 

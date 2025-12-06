@@ -2,6 +2,7 @@ package view;
 
 import model.*;
 import exceptions.HotelException;
+import service.HotelService;
 import util.StateManager;
 
 import java.time.LocalDate;

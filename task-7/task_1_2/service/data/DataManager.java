@@ -1,6 +1,11 @@
-package model;
+package service.data;
 
 import exceptions.HotelException;
+import model.*;
+import service.managers.GuestManager;
+import service.managers.RoomManager;
+import service.managers.ServiceManager;
+import service.managers.ServiceRecordManager;
 import util.CsvManager;
 import util.IdGenerator;
 

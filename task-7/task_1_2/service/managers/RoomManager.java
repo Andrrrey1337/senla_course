@@ -1,7 +1,10 @@
-package model;
+package service.managers;
 
 import config.ConfigManager;
 import exceptions.HotelException;
+import model.Residence;
+import model.Room;
+import model.RoomStatus;
 import util.IdGenerator;
 
 import java.io.IOException;
