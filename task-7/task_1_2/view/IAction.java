@@ -1,4 +1,4 @@
-package task_1.view;
+package view;
 
 public interface IAction {
     void execute();

@@ -1,21 +1,14 @@
-package task_1.model;
+package model;
 
-import task_1.IdGenerator.IdGenerator;
-
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Residence {
+public class Residence implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final long id;
     public Guest guest;
     public LocalDate checkInDate;
     public LocalDate checkOutDate;
-
-    public Residence(Guest guest, LocalDate checkInDate, LocalDate checkOutDate) {
-        this.id = IdGenerator.next();
-        this.guest = guest;
-        this.checkInDate = checkInDate;
-        this.checkOutDate = checkOutDate;
-    }
 
     public Residence(long id, Guest guest, LocalDate checkInDate, LocalDate checkOutDate) {
         this.id = id;

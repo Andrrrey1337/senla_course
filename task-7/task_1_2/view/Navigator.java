@@ -1,4 +1,4 @@
-package task_1.view;
+package view;
 
 public class Navigator {
     private Menu currentMenu;
