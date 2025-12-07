@@ -1,5 +1,7 @@
 package view;
 
+import service.HotelService;
+
 import java.util.Scanner;
 
 public class MenuController {
@@ -7,8 +9,8 @@ public class MenuController {
     private Navigator navigator;
     private Scanner scanner = new Scanner(System.in);
 
-    public MenuController() {
-        this.builder = new Builder();
+    public MenuController(HotelService hotelService) {
+        this.builder = new Builder(hotelService);
         this.navigator = new Navigator(builder.buildRootMenu());
     }
 

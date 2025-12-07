@@ -1,5 +1,8 @@
 package service.data;
 
+import annotations.Component;
+import annotations.Inject;
+import annotations.Singleton;
 import exceptions.HotelException;
 import model.*;
 import service.managers.GuestManager;
@@ -16,21 +19,24 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@Singleton
 public class DataManager implements Serializable {
     private static final long serialVersionUID = 1L;
-    private final RoomManager roomManager;
-    private final ServiceManager serviceManager;
-    private final GuestManager guestManager;
-    private final ServiceRecordManager serviceRecordManager;
-    private final IdGenerator idGeneratorState;
 
-    public DataManager(RoomManager roomManager, ServiceManager serviceManager, GuestManager guestManager,
-                       ServiceRecordManager serviceRecordManager, IdGenerator idGeneratorState) {
-        this.roomManager = roomManager;
-        this.serviceManager = serviceManager;
-        this.guestManager = guestManager;
-        this.serviceRecordManager = serviceRecordManager;
-        this.idGeneratorState = idGeneratorState;
+    @Inject
+    private RoomManager roomManager;
+    @Inject
+    private ServiceManager serviceManager;
+    @Inject
+    private GuestManager guestManager;
+    @Inject
+    private ServiceRecordManager serviceRecordManager;
+    @Inject
+    private IdGenerator idGeneratorState;
+
+    public void init() {
+        serviceRecordManager.init();
     }
 
     public void exportGuests(String filePath) throws HotelException {
