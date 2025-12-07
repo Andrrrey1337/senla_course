@@ -1,17 +1,12 @@
-package task_1.model;
+package model;
 
-import task_1.IdGenerator.IdGenerator;
+import java.io.Serializable;
 
-public class Service {
+public class Service implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final long id;
     private String name;
     private double price;
-
-    public Service(String name, double price) {
-        this.id = IdGenerator.next();
-        this.name = name;
-        this.price = price;
-    }
 
     public Service(long id, String name, double price) {
         this.id = id;

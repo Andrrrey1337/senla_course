@@ -1,13 +1,15 @@
-package task_1.model;
+package model;
 
 
-import task_1.IdGenerator.IdGenerator;
+import config.ConfigManager;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Room {
+public class Room implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final long id;
     private int number;
     private int capacity;
@@ -18,23 +20,16 @@ public class Room {
     private LocalDate checkOutDate;
     private RoomStatus status;
     public final List<Residence> residenceHistory = new ArrayList<>();
+    private  int maxHistorySize;
 
-    public Room(int number, double price, int capacity, int stars) {
-        this.id = IdGenerator.next();
+    public Room(long id, int number, double price, int capacity, int stars) {
+        this.id = id;
         this.number = number;
         this.price = price;
         this.status = RoomStatus.AVAILABLE;
         this.capacity = capacity;
         this.stars = stars;
-    }
-
-    public Room(long id, int number, double price, int capacity, int stars, RoomStatus status) {
-        this.id = id;
-        this.number = number;
-        this.price = price;
-        this.status = status;
-        this.capacity = capacity;
-        this.stars = stars;
+        initializeConfig();
     }
 
     public Room(long id, int number, double price, int capacity, int stars, RoomStatus status, LocalDate checkInDate,
@@ -47,6 +42,17 @@ public class Room {
         this.stars = stars;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
+        initializeConfig();
+    }
+
+    private void initializeConfig() {
+        try {
+            this.maxHistorySize = ConfigManager.getInstance().getRoomResidenceHistorySize();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.err.println("Не удалось загрузить конфигурацию, используется значение по умолчанию для размера истории");
+            this.maxHistorySize = 3;
+        }
     }
 
     public double calculatePayment() {
@@ -59,7 +65,8 @@ public class Room {
 
     public void addResidence(Guest guest, LocalDate checkInDate, LocalDate checkOutDate) {
         residenceHistory.add(new Residence(id, guest,checkInDate,checkOutDate));
-        if (residenceHistory.size() > 3) {
+        // если maxHistorySize == 0, то история будет бесконечной
+        if (residenceHistory.size() > maxHistorySize && maxHistorySize > 0) {
             residenceHistory.removeFirst();
         }
     }

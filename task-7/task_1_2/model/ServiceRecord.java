@@ -1,21 +1,14 @@
-package task_1.model;
+package model;
 
-import task_1.IdGenerator.IdGenerator;
-
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class ServiceRecord {
+public class ServiceRecord implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final long id;
     private final long guestId;
     private final long serviceId;
     public final LocalDate date;
-
-    public ServiceRecord(Long serviceId, Long guestId, LocalDate date) {
-        this.id = IdGenerator.next();
-        this.guestId = guestId;
-        this.serviceId = serviceId;
-        this.date = date;
-    }
 
     public ServiceRecord(long id,  Long guestId, Long serviceId, LocalDate date) {
         this.id = id;
