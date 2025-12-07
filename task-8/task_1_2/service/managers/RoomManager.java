@@ -1,5 +1,6 @@
 package service.managers;
 
+import annotations.*;
 import config.ConfigManager;
 import exceptions.HotelException;
 import model.Residence;
@@ -7,7 +8,6 @@ import model.Room;
 import model.RoomStatus;
 import util.IdGenerator;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,13 +16,23 @@ import java.util.Map;
 import java.util.HashMap;
 import java.time.LocalDate;
 
+@Component
+@Singleton
 public class RoomManager implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Map<Integer, Room> rooms = new HashMap<>();
-    private final IdGenerator idGeneratorState;
 
-    public RoomManager(IdGenerator idGenerator) {
-        this.idGeneratorState = idGenerator;
+    @Inject
+    private IdGenerator idGenerator;
+
+    @Inject
+    private GuestManager guestManager;
+
+    @ConfigProperty(propertyName = "room.status.change.enabled", type = ConfigType.BOOLEAN)
+    private boolean isAllowChangeStatus;
+
+    public RoomManager() {
+        ConfigManager.config(this); // внедрение конфига при создании
     }
 
     public void addRoom(int number, double price, int capacity, int stars) throws HotelException {
@@ -32,7 +42,7 @@ public class RoomManager implements Serializable {
         if (rooms.containsKey(number)) {
             throw new HotelException("Комната с номером " + number + " уже существует");
         }
-        rooms.put(number, new Room(idGeneratorState.next(), number, price, capacity, stars));
+        rooms.put(number, new Room(idGenerator.next(), number, price, capacity, stars));
     }
 
     public void updatePriceRoom(int number, double newPrice) throws HotelException {
@@ -48,10 +58,10 @@ public class RoomManager implements Serializable {
 
     public void setRoomStatus(int number, RoomStatus status) throws HotelException {
         try {
-            if (!ConfigManager.getInstance().isRoomStatusChangeEnabled()) {
+            if (!isAllowChangeStatus) {
                 throw new HotelException("Возможность изменять статус номера отключена в конфигурации.");
             }
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             throw new HotelException("Ошибка при загрузке конфигурации: " + e.getMessage(), e);
         }
         Room room = rooms.get(number);
@@ -109,9 +119,14 @@ public class RoomManager implements Serializable {
         return room.calculatePayment();
     }
 
-    public List<Residence> getThreeLastGuests(int number) {
-        Room room = rooms.get(number);
-        return room.getResidence();
+    public List<Residence> getThreeLastGuests(int number) throws HotelException{
+        try {
+            Room room = rooms.get(number);
+            return room.getResidence();
+        }
+        catch (Exception e) {
+            throw new HotelException("Комнаты с таким номером не существует");
+        }
     }
 
     public List<Room> getAllRoomsSortedByPrice() {

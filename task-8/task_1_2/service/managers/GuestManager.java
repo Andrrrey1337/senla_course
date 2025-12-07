@@ -1,25 +1,25 @@
 package service.managers;
 
+import annotations.Component;
+import annotations.Singleton;
+import annotations.Inject;
 import exceptions.HotelException;
 import model.Guest;
 import util.IdGenerator;
-
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
+@Component
+@Singleton
 public class GuestManager implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Map<String, Guest> guestsByName = new HashMap<>();
     private static final Map<Long, Guest> guestsById = new HashMap<>();
-    private final IdGenerator idGeneratorState;
 
-    public GuestManager(IdGenerator idGenerator) {
-        this.idGeneratorState = idGenerator;
-    }
+    @Inject
+    private IdGenerator idGenerator;
 
+    // остальной код без изменений
     Guest createOrFindGuest(String name) throws HotelException {
         if (name == null || name.isEmpty()) {
             throw new HotelException("Имя гостя не может быть пустым");
@@ -27,7 +27,7 @@ public class GuestManager implements Serializable {
         if (guestsByName.containsKey(name)) {
             return guestsByName.get(name);
         }
-        Guest guest = new Guest(idGeneratorState.next(), name);
+        Guest guest = new Guest(idGenerator.next(), name);
         guestsByName.put(name, guest);
         guestsById.put(guest.getId(), guest);
         return guest;
@@ -53,7 +53,6 @@ public class GuestManager implements Serializable {
         return new ArrayList<>(guestsById.values());
     }
 
-    //  методы для DataManager
     public void updateOrCreateGuest(long id, String name) {
         if (guestsById.containsKey(id)) {
             Guest existing = guestsById.get(id);

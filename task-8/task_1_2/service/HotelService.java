@@ -1,48 +1,39 @@
 package service;
 
+import annotations.Component;
+import annotations.Singleton;
+import annotations.Inject;
 import exceptions.HotelException;
 import model.*;
 import service.data.DataManager;
 import service.managers.*;
 import util.IdGenerator;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
+@Component
+@Singleton
 public class HotelService implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    @Inject
+    private RoomManager roomManager;
+    @Inject
+    private ServiceManager serviceManager;
+    @Inject
+    private GuestManager guestManager;
+    @Inject
+    private ServiceRecordManager serviceRecordManager;
+    @Inject
+    private BookingManager bookingManager;
+    @Inject
+    public DataManager dataManager;
+    @Inject
+    private IdGenerator idGeneratorState;
     private static HotelService instance;
-    private final IdGenerator idGeneratorState = new IdGenerator();
-    private final RoomManager roomManager;
-    private final ServiceManager serviceManager;
-    private final GuestManager guestManager;
-    private final ServiceRecordManager serviceRecordManager;
-    private final BookingManager bookingManager;
-    private final DataManager dataManager;
 
-    private HotelService() {
-        this.roomManager = new RoomManager(idGeneratorState);
-        this.serviceManager = new ServiceManager(idGeneratorState);
-        this.guestManager = new GuestManager(idGeneratorState);
-        this.serviceRecordManager = new ServiceRecordManager(idGeneratorState, guestManager, serviceManager);
-        this.bookingManager = new BookingManager(roomManager, guestManager);
-        this.dataManager = new DataManager(roomManager, serviceManager, guestManager, serviceRecordManager, idGeneratorState);
-    }
-
-    public static void setInstanceForLoading(HotelService loadedHotelService) {
-        if (instance == null) {
-            instance = loadedHotelService;
-        }
-    }
-
-    public static HotelService getInstance() {
-        if (instance == null) {
-            instance = new HotelService();
-        }
-        return instance;
-    }
 
     // методы RoomManager
     public void addRoom(int number, double price, int capacity, int stars) throws HotelException {
@@ -89,7 +80,7 @@ public class HotelService implements Serializable {
         return roomManager.getPaymentForRoom(number);
     }
 
-    public List<Residence> getThreeLastGuests(int number) {
+    public List<Residence> getThreeLastGuests(int number) throws HotelException {
         return roomManager.getThreeLastGuests(number);
     }
 

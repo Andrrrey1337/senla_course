@@ -1,32 +1,34 @@
 package service.managers;
 
+import annotations.Component;
+import annotations.Singleton;
+import annotations.Inject;
 import exceptions.HotelException;
-import model.Guest;
-import model.Service;
-import model.ServiceRecord;
+import model.*;
 import util.IdGenerator;
-
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.time.LocalDate;
+import java.util.*;
 
+@Component
+@Singleton
 public class ServiceRecordManager implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Map<Long, List<ServiceRecord>> serviceRecordsByGuestId = new HashMap<>();
     private final Map<Long, Service> servicesById = new HashMap<>();
-    private final GuestManager guestManager;
-    private final ServiceManager serviceManager;
-    private final IdGenerator idGeneratorState;
 
-    public ServiceRecordManager(IdGenerator idGenerator, GuestManager guestManager, ServiceManager serviceManager) {
-        this.idGeneratorState = idGenerator;
-        this.guestManager = guestManager;
-        this.serviceManager = serviceManager;
+    @Inject
+    private IdGenerator idGenerator;
+
+    @Inject
+    private GuestManager guestManager;
+
+    @Inject
+    private ServiceManager serviceManager;
+
+    public ServiceRecordManager() {}
+
+    public void init() {
         for (Service service : serviceManager.getAllServices()) {
             servicesById.put(service.getId(), service);
         }
@@ -38,7 +40,7 @@ public class ServiceRecordManager implements Serializable {
         }
         Guest guest = guestManager.createOrFindGuest(guestName);
         List<ServiceRecord> records = serviceRecordsByGuestId.computeIfAbsent(guest.getId(), k -> new ArrayList<>());
-        records.add(new ServiceRecord(idGeneratorState.next(), guest.getId(), serviceManager.getAllServices().stream()
+        records.add(new ServiceRecord(idGenerator.next(), guest.getId(), serviceManager.getAllServices().stream()
                 .filter(s -> s.getName().equals(serviceName)).findFirst().get().getId(), date));
     }
 

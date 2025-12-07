@@ -1,22 +1,25 @@
 package service.managers;
 
+import annotations.Component;
+import annotations.Singleton;
+import annotations.Inject;
 import exceptions.HotelException;
 import model.Guest;
 import model.Room;
 import model.RoomStatus;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 
+@Component
+@Singleton
 public class BookingManager implements Serializable {
     private static final long serialVersionUID = 1L;
-    private final RoomManager roomManager;
-    private final GuestManager guestManager;
 
-    public BookingManager(RoomManager roomManager, GuestManager guestManager) {
-        this.roomManager = roomManager;
-        this.guestManager = guestManager;
-    }
+    @Inject
+    private RoomManager roomManager;
+
+    @Inject
+    private GuestManager guestManager;
 
     public void checkIn(int number, String guestName, LocalDate checkInDate, LocalDate checkOutDate) throws HotelException {
         Room room = roomManager.getRoomDetails(number);
