@@ -12,9 +12,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Builder {
-    private static final StateManager stateManager = new StateManager();
-    private static Scanner scanner = new Scanner(System.in);
-    private HotelService hotelService = HotelService.getInstance();
+    private final StateManager stateManager = new StateManager();
+    private final Scanner scanner = new Scanner(System.in);
+    private final HotelService hotelService;
+
+    public Builder(HotelService hotelService) {
+        this.hotelService = hotelService;
+    }
 
     public Menu buildRootMenu() {
         return new Menu("Главное меню",
@@ -42,7 +46,7 @@ public class Builder {
                 new MenuItem("Посмотреть кол-во свободных номеров", this::printCountAvailableRooms),
                 new MenuItem("Посмотреть кол-во постояльцев", this::printCountGuests),
                 new MenuItem("Оплата за номер", this::printPaymentForRoom),
-                new MenuItem("Последние 3 гостя номера", this::printThreeLastGuests),
+                new MenuItem("Последние N гостей номера", this::printThreeLastGuests),
                 new MenuItem("Все цены", this::printAllPrices),
                 new MenuItem("Детали номера", this::printRoomDetails),
                 new MenuItem("Экспорт гостей (CSV)", this::exportGuests),
@@ -56,7 +60,7 @@ public class Builder {
                 new MenuItem("Выход", () -> {
                     try {
                         System.out.println("\nСохранение состояния перед завершением...");
-                        stateManager.saveState(HotelService.getInstance());
+                        stateManager.saveState(hotelService);
                     } catch (HotelException e) {
                         System.err.println("Ошибка при сохранении состояния: " + e.getMessage());
                         e.printStackTrace();
@@ -353,10 +357,14 @@ public class Builder {
     private void printThreeLastGuests() {
         System.out.print("Введите номер комнаты: ");
         int number = getIntInput();
-        List<Residence> history = hotelService.getThreeLastGuests(number);
-        System.out.println("Последние 3 постояльца номера " + number + ":");
-        for (Residence residence : history) {
-            System.out.println(residence.getGuest());
+        try {
+            List<Residence> history = hotelService.getThreeLastGuests(number);
+            System.out.println("Последние 3 постояльца номера " + number + ":");
+            for (Residence residence : history) {
+                System.out.println(residence.getGuest());
+            }
+        } catch (HotelException e) {
+            System.out.println("Ошибка при получении последних гостей комнаты: " + e.getMessage());
         }
     }
 

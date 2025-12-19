@@ -1,6 +1,8 @@
 package model;
 
 
+import annotations.ConfigProperty;
+import annotations.ConfigType;
 import config.ConfigManager;
 
 import java.io.Serializable;
@@ -20,7 +22,8 @@ public class Room implements Serializable {
     private LocalDate checkOutDate;
     private RoomStatus status;
     public final List<Residence> residenceHistory = new ArrayList<>();
-    private  int maxHistorySize;
+    @ConfigProperty(propertyName = "room.residence.history.size", type = ConfigType.INT)
+    private int maxHistorySize;
 
     public Room(long id, int number, double price, int capacity, int stars) {
         this.id = id;
@@ -29,7 +32,7 @@ public class Room implements Serializable {
         this.status = RoomStatus.AVAILABLE;
         this.capacity = capacity;
         this.stars = stars;
-        initializeConfig();
+        ConfigManager.config(this);
     }
 
     public Room(long id, int number, double price, int capacity, int stars, RoomStatus status, LocalDate checkInDate,
@@ -42,17 +45,7 @@ public class Room implements Serializable {
         this.stars = stars;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
-        initializeConfig();
-    }
-
-    private void initializeConfig() {
-        try {
-            this.maxHistorySize = ConfigManager.getInstance().getRoomResidenceHistorySize();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.err.println("Не удалось загрузить конфигурацию, используется значение по умолчанию для размера истории");
-            this.maxHistorySize = 3;
-        }
+        ConfigManager.config(this);
     }
 
     public double calculatePayment() {

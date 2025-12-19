@@ -1,25 +1,23 @@
 package service.managers;
 
+import annotations.Component;
+import annotations.Singleton;
+import annotations.Inject;
 import exceptions.HotelException;
 import model.Service;
 import util.IdGenerator;
-
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
+@Component
+@Singleton
 public class ServiceManager implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Map<String, Service> servicesByName = new HashMap<>();
     private final Map<Long, Service> servicesById = new HashMap<>();
-    private final IdGenerator idGeneratorState;
 
-    public ServiceManager(IdGenerator idGenerator) {
-        this.idGeneratorState = idGenerator;
-    }
+    @Inject
+    private IdGenerator idGenerator;
 
     public void addService(String name, double price) throws HotelException {
         if (name == null || name.isEmpty()) {
@@ -31,7 +29,7 @@ public class ServiceManager implements Serializable {
         if (servicesByName.containsKey(name)) {
             throw new HotelException("Услуга с названием '" + name + "' уже существует");
         }
-        Service service = new Service(idGeneratorState.next(), name, price);
+        Service service = new Service(idGenerator.next(), name, price);
         servicesByName.put(name, service);
         servicesById.put(service.getId(), service);
     }
