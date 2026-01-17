@@ -19,10 +19,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Singleton
 public class ServiceRecordManager {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceRecordManager.class);
 
     @Inject
     private IdGenerator idGenerator;
@@ -56,13 +59,18 @@ public class ServiceRecordManager {
 
             cm.commitTransaction();
         } catch (DaoException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
+            try {
+                ConnectionManager.getInstance().rollbackTransaction();
+            } catch (Exception rollbackEx) {
+                logger.error("Не удалось выполнить откат транзакции при заказе услуги: {}", rollbackEx.getMessage(), rollbackEx);
+            }
             throw new HotelException(e.getMessage(), e);
-        } catch (HotelException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw e;
-        } catch (RuntimeException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
+        } catch (HotelException | RuntimeException e) {
+            try {
+                ConnectionManager.getInstance().rollbackTransaction();
+            } catch (Exception rollbackEx) {
+                logger.error("Не удалось выполнить откат транзакции при заказе услуги: {}", rollbackEx.getMessage(), rollbackEx);
+            }
             throw e;
         }
     }

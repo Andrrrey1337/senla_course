@@ -12,10 +12,13 @@ import task_1_2_3.model.RoomStatus;
 import task_1_2_3.util.constants.BusinessMessages;
 
 import java.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Singleton
 public class BookingManager {
+    private static final Logger logger = LoggerFactory.getLogger(BookingManager.class);
 
     @Inject
     private RoomManager roomManager;
@@ -53,15 +56,13 @@ public class BookingManager {
             residenceManager.createResidence(guest.getId(), room.getId(), checkInDate, checkOutDate);
 
             cm.commitTransaction();
-        } catch (DaoException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw new HotelException(e.getMessage(), e);
-        } catch (HotelException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw e;
-        } catch (RuntimeException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw e;
+        } catch (DaoException | HotelException | RuntimeException e) {
+            try {
+                ConnectionManager.getInstance().rollbackTransaction();
+            } catch (Exception rollbackEx) {
+                logger.error("Не удалось выполнить откат транзакции при заселении: {}", rollbackEx.getMessage(), rollbackEx);
+            }
+            throw e instanceof HotelException ? (HotelException) e : new HotelException(e.getMessage(), e);
         }
     }
 

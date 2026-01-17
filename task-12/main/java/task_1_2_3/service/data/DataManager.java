@@ -20,10 +20,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Singleton
 public class DataManager {
+    private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
 
     @Inject
     private RoomManager roomManager;
@@ -70,11 +73,12 @@ public class DataManager {
             if (maxIdSeen > 0) idGeneratorState.setNext(maxIdSeen + 1);
 
             ConnectionManager.getInstance().commitTransaction();
-        } catch (NumberFormatException | IOException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw new HotelException("Ошибка при импорте гостей из файла: " + e.getMessage(), e);
-        } catch (DaoException | HotelException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
+        } catch (NumberFormatException | IOException | DaoException | HotelException e) {
+            try {
+                ConnectionManager.getInstance().rollbackTransaction();
+            } catch (Exception rollbackEx) {
+                logger.error("Не удалось выполнить откат транзакции при импорте гостей: {}", rollbackEx.getMessage(), rollbackEx);
+            }
             throw new HotelException("Ошибка при импорте гостей из файла: " + e.getMessage(), e);
         }
     }
@@ -111,11 +115,12 @@ public class DataManager {
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
 
             ConnectionManager.getInstance().commitTransaction();
-        } catch (NumberFormatException | IOException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw new HotelException("Ошибка при импорте услуг из файла: " + e.getMessage(), e);
-        } catch (DaoException | HotelException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
+        } catch (NumberFormatException | IOException | DaoException | HotelException e) {
+            try {
+                ConnectionManager.getInstance().rollbackTransaction();
+            } catch (Exception rollbackEx) {
+                logger.error("Не удалось выполнить откат транзакции при импорте услуг: {}", rollbackEx.getMessage(), rollbackEx);
+            }
             throw new HotelException("Ошибка при импорте услуг из файла: " + e.getMessage(), e);
         }
     }
@@ -173,11 +178,11 @@ public class DataManager {
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
 
             ConnectionManager.getInstance().commitTransaction();
-        } catch (IllegalArgumentException | IOException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw new HotelException("Ошибка при импорте комнат из файла: " + e.getMessage(), e);
-        } catch (DaoException | HotelException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
+        } catch (IllegalArgumentException | IOException | DaoException | HotelException e) {
+            try { ConnectionManager.getInstance().rollbackTransaction();
+            } catch (Exception rollbackEx) {
+                logger.error("Не удалось выполнить откат транзакции при импорте комнат: {}", rollbackEx.getMessage(), rollbackEx);
+            }
             throw new HotelException("Ошибка при импорте комнат из файла: " + e.getMessage(), e);
         }
     }
@@ -221,11 +226,11 @@ public class DataManager {
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
 
             ConnectionManager.getInstance().commitTransaction();
-        } catch (NumberFormatException | DateTimeParseException | IOException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
-            throw new HotelException("Ошибка при импорте записей услуг из файла: " + e.getMessage(), e);
-        } catch (DaoException | HotelException e) {
-            try { ConnectionManager.getInstance().rollbackTransaction(); } catch (Exception ignored) {}
+        } catch (NumberFormatException | DateTimeParseException | IOException | DaoException | HotelException e) {
+            try { ConnectionManager.getInstance().rollbackTransaction();
+            } catch (Exception rollbackEx) {
+                logger.error("Не удалось выполнить откат транзакции при импорте записей услуг: {}", rollbackEx.getMessage(), rollbackEx);
+            }
             throw new HotelException("Ошибка при импорте записей услуг из файла: " + e.getMessage(), e);
         }
     }

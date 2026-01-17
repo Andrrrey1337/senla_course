@@ -13,10 +13,13 @@ import task_1_2_3.util.constants.BusinessMessages;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Singleton
 public class ServiceManager {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
     private static ServiceManager instance;
 
@@ -65,6 +68,7 @@ public class ServiceManager {
         try {
             return serviceDao.findAll();
         } catch (DaoException e) {
+            logger.error("Ошибка при получении списка услуг: {}", e.getMessage(), e);
             return List.of();
         }
     }
@@ -97,6 +101,7 @@ public class ServiceManager {
         try {
             return instance.serviceDao.findById(id).isPresent();
         } catch (DaoException e) {
+            logger.error("Ошибка проверки существования услуги id={}: {}", id, e.getMessage(), e);
             return false;
         }
     }

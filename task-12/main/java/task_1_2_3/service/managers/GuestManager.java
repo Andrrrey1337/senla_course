@@ -12,10 +12,13 @@ import task_1_2_3.util.constants.BusinessMessages;
 
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Singleton
 public class GuestManager {
+    private static final Logger logger = LoggerFactory.getLogger(GuestManager.class);
 
     private static GuestManager instance;
 
@@ -72,6 +75,7 @@ public class GuestManager {
         try {
             return guestDao.findAll();
         } catch (DaoException e) {
+            logger.error("Ошибка при получении списка гостей: {}", e.getMessage(), e);
             return List.of();
         }
     }
@@ -97,6 +101,7 @@ public class GuestManager {
         try {
             return instance.guestDao.findById(id).isPresent();
         } catch (DaoException e) {
+            logger.error("Ошибка проверки существования гостя id={}: {}", id, e.getMessage(), e);
             return false;
         }
     }

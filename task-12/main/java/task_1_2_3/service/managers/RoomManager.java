@@ -17,10 +17,13 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Singleton
 public class RoomManager {
+    private static final Logger logger = LoggerFactory.getLogger(RoomManager.class);
 
     @ConfigProperty(propertyName = ConfigConstants.ROOM_STATUS_CHANGE_ENABLED, type = ConfigType.BOOLEAN)
     private boolean isAllowChangeStatus;
@@ -73,6 +76,7 @@ public class RoomManager {
                     .map(Room::calculatePayment)
                     .orElse(0.0);
         } catch (DaoException e) {
+            logger.error("Ошибка расчета оплаты для номера {}: {}", number, e.getMessage(), e);
             return 0.0;
         }
     }
@@ -96,7 +100,7 @@ public class RoomManager {
         try {
             return roomDao.findAll();
         } catch (DaoException e) {
-            e.printStackTrace();
+            logger.error("Ошибка при получении списка всех комнат: {}", e.getMessage(), e);
             return List.of();
         }
     }
