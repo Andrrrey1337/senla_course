@@ -3,25 +3,49 @@ package task_1_2_3.view;
 import task_1_2_3.service.HotelService;
 
 import java.util.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MenuController {
+    private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
     private Builder builder;
-    private Navigator navigator;
-    private Scanner scanner = new Scanner(System.in);
+    private Menu currentMenu;
+    private final Scanner scanner = new Scanner(System.in);
 
     public MenuController(HotelService hotelService) {
         this.builder = new Builder(hotelService);
-        this.navigator = new Navigator(builder.buildRootMenu());
+        this.currentMenu = builder.buildRootMenu();
     }
 
     public void run() {
         while (true) {
-            navigator.printMenu();
+            printMenu();
             System.out.print("Выберите действие: ");
             int choice = getInt();
-            navigator.navigate(choice);
+            navigate(choice);
         }
     }
+
+    public void printMenu() {
+        currentMenu.print();
+    }
+
+    public void navigate(int index) {
+        MenuItem item = currentMenu.getItem(index - 1);
+        if (item != null) {
+            logger.info("Начало обработки команды от пользователя: '{}'", item.getTitle());
+            try {
+                item.doAction();
+                logger.info("Команда '{}' успешно обработана.", item.getTitle());
+            }
+            catch (Exception e) {
+                logger.error("Ошибка при обработке команды '{}': ", item.getTitle());
+            }
+        } else {
+            System.out.println("Неверный выбор.");
+        }
+    }
+
     private int getInt() {
         while (true) {
             try {
