@@ -64,7 +64,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.6.0</version>
         <configuration>
-          <configLocation>task-14/main/resources/checkstyle/checkstyle.xml</configLocation>
+          <configLocation>src/main/resources/checkstyle/checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <failsOnError>true</failsOnError>
           <linkXRef>false</linkXRef>
