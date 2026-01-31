@@ -14,7 +14,19 @@
   </properties>
 
   <dependencies>
-    <!-- PostgreSQL JDBC -->
+
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>6.4.4.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -26,6 +38,7 @@
       <artifactId>logback-classic</artifactId>
       <version>1.4.11</version>
     </dependency>
+
   </dependencies>
 
   <build>
@@ -45,14 +58,12 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.6.0</version>
         <configuration>
-          <configLocation>${project.basedir}/task-12/main/resources/checkstyle.xml</configLocation>
-
-          <encoding>UTF-8</encoding>
+          <configLocation>src/main/resources/checkstyle/checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <failsOnError>true</failsOnError>
           <linkXRef>false</linkXRef>
 
-          <propertyExpansion>checkstyle.config.path=${project.basedir}/task-12/main/resources</propertyExpansion>
+          <propertyExpansion>checkstyle.config.path=${project.basedir}/task-13/main/resources/checkstyle</propertyExpansion>
         </configuration>
         <executions>
           <execution>
