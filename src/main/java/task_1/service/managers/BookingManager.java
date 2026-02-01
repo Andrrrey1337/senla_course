@@ -1,8 +1,8 @@
 package task_1.service.managers;
 
-import task_1.annotations.Component;
-import task_1.annotations.Inject;
-import task_1.annotations.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import task_1.db.ConnectionManager;
 import task_1.exceptions.DaoException;
 import task_1.exceptions.HotelException;
@@ -12,22 +12,20 @@ import task_1.model.RoomStatus;
 import task_1.util.constants.BusinessMessages;
 
 import java.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@Component
-@Singleton
+@Service
 public class BookingManager {
     private static final Logger logger = LoggerFactory.getLogger(BookingManager.class);
 
-    @Inject
-    private RoomManager roomManager;
+    private final RoomManager roomManager;
+    private final GuestManager guestManager;
+    private final ResidenceManager residenceManager;
 
-    @Inject
-    private GuestManager guestManager;
-
-    @Inject
-    private ResidenceManager residenceManager;
+    public BookingManager(RoomManager roomManager, GuestManager guestManager, ResidenceManager residenceManager) {
+        this.roomManager = roomManager;
+        this.guestManager = guestManager;
+        this.residenceManager = residenceManager;
+    }
 
     public void checkIn(int number, String guestName, LocalDate checkInDate, LocalDate checkOutDate) throws HotelException {
         try {

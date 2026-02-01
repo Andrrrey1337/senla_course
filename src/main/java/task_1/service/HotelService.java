@@ -1,35 +1,36 @@
 package task_1.service;
 
-import task_1.annotations.Component;
-import task_1.annotations.Singleton;
-import task_1.annotations.Inject;
 import task_1.exceptions.HotelException;
 import task_1.model.*;
-import task_1.service.data.DataManager;
 import task_1.service.managers.*;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
-@Component
-@Singleton
+@Service
 public class HotelService {
 
-    @Inject
-    private ResidenceManager residenceManager;
-    @Inject
-    private RoomManager roomManager;
-    @Inject
-    private ServiceManager serviceManager;
-    @Inject
-    private GuestManager guestManager;
-    @Inject
-    private ServiceRecordManager serviceRecordManager;
-    @Inject
-    private BookingManager bookingManager;
-    @Inject
-    private DataManager dataManager;
+    private final ResidenceManager residenceManager;
+    private final RoomManager roomManager;
+    private final ServiceManager serviceManager;
+    private final GuestManager guestManager;
+    private final ServiceRecordManager serviceRecordManager;
+    private final BookingManager bookingManager;
+    private final DataManager dataManager;
+
+    public HotelService(ResidenceManager residenceManager, RoomManager roomManager, ServiceManager serviceManager,
+                        GuestManager guestManager, ServiceRecordManager serviceRecordManager,
+                        BookingManager bookingManager, DataManager dataManager) {
+        this.residenceManager = residenceManager;
+        this.roomManager = roomManager;
+        this.serviceManager = serviceManager;
+        this.guestManager = guestManager;
+        this.serviceRecordManager = serviceRecordManager;
+        this.bookingManager = bookingManager;
+        this.dataManager = dataManager;
+    }
 
     // методы RoomManager
     public void addRoom(int number, double price, int capacity, int stars) throws HotelException {
@@ -98,11 +99,11 @@ public class HotelService {
         serviceManager.updatePriceService(name, newPrice);
     }
 
-    public List<Service> getAllServices() {
+    public List<task_1.model.Service> getAllServices() {
         return serviceManager.getAllServices();
     }
 
-    public List<Service> getAllServicesSortedByPrice() {
+    public List<task_1.model.Service> getAllServicesSortedByPrice() {
         return serviceManager.getAllServicesSortedByPrice();
     }
 

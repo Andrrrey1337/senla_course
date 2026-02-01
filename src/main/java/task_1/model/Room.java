@@ -1,11 +1,9 @@
 package task_1.model;
 
 
-import task_1.config.ConfigManager;
-
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "room")
@@ -50,7 +48,6 @@ public class Room {
         this.status = RoomStatus.AVAILABLE;
         this.capacity = capacity;
         this.stars = stars;
-        ConfigManager.config(this);
     }
 
     public Room(long id, int number, double price, int capacity, int stars, RoomStatus status, LocalDate checkInDate,
@@ -63,7 +60,6 @@ public class Room {
         this.stars = stars;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
-        ConfigManager.config(this);
     }
 
     public double calculatePayment() {

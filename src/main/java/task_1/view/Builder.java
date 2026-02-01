@@ -1,25 +1,29 @@
 package task_1.view;
 
-import task_1.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import task_1.exceptions.HotelException;
+import task_1.model.*;
 import task_1.service.HotelService;
 import task_1.service.managers.GuestManager;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Scanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Component
 public class Builder {
     private static final Logger logger = LoggerFactory.getLogger(Builder.class);
-    private final Scanner scanner = new Scanner(System.in);
-    private final HotelService hotelService;
 
-    public Builder(HotelService hotelService) {
+    private final HotelService hotelService;
+    private final GuestManager guestManager;
+    private final ConsoleUI ui;
+
+    public Builder(HotelService hotelService, GuestManager guestManager, ConsoleUI ui) {
         this.hotelService = hotelService;
+        this.guestManager = guestManager;
+        this.ui = ui;
     }
 
     public Menu buildRootMenu() {
@@ -64,480 +68,352 @@ public class Builder {
     }
 
     private void addRoom() {
-        System.out.print("Введите номер: ");
-        int number = getIntInput();
-        System.out.print("Введите цену за ночь: ");
-        double price = getDoubleInput();
-        System.out.print("Введите вместимость: ");
-        int capacity = getIntInput();
-        System.out.print("Введите количество звезд: ");
-        int stars = getIntInput();
+        int number = ui.readInt("Введите номер");
+        double price = ui.readDouble("Введите цену за ночь");
+        int capacity = ui.readInt("Введите вместимость");
+        int stars = ui.readInt("Введите количество звезд");
 
         try {
             hotelService.addRoom(number, price, capacity, stars);
-            System.out.println("Комната с номером: " + number + " и стоимостью: " + price + " добавлена");
+            ui.print("Комната с номером: " + number + " и стоимостью: " + price + " добавлена");
         } catch (HotelException e) {
-            logger.error("Ошибка при добавлении номера {}: {}", number, e.getMessage(), e);
-            System.out.println("Ошибка при добавлении комнаты: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при добавлении номера " + number, e);
         }
     }
 
     private void addService() {
-        System.out.print("Введите название услуги: ");
-        String name = scanner.nextLine();
-        System.out.print("Введите цену: ");
-        double price = getDoubleInput();
+        String name = ui.readString("Введите название услуги");
+        double price = ui.readDouble("Введите цену");
 
         try {
             hotelService.addService(name, price);
-            System.out.println("Добавлена услуга с названием: " + name + " и стоимостью: " + price);
+            ui.print("Добавлена услуга с названием: " + name + " и стоимостью: " + price);
         } catch (HotelException e) {
-            logger.error("Ошибка при добавлении услуги '{}': {}", name, e.getMessage(), e);
-            System.out.println("Ошибка при добавлении услуги: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при добавлении услуги '" + name + "'", e);
         }
     }
 
     private void checkIn() {
-        int number = 0;
-        String name = null;
+        int number = ui.readInt("Введите номер комнаты");
+        String name = ui.readString("Введите имя гостя");
+        LocalDate checkIn = ui.readDate("Введите дату заселения");
+        LocalDate checkOut = ui.readDate("Введите дату выселения");
+
         try {
-            System.out.print("Введите номер комнаты: ");
-            number = getIntInput();
-            System.out.print("Введите имя гостя: ");
-            name = scanner.nextLine();
-            System.out.print("Введите дату заселения (YYYY-MM-DD): ");
-            LocalDate checkIn = LocalDate.parse(scanner.nextLine());
-            System.out.print("Введите дату выселения (YYYY-MM-DD): ");
-            LocalDate checkOut = LocalDate.parse(scanner.nextLine());
-
             hotelService.checkIn(number, name, checkIn, checkOut);
-            System.out.println("Гость: " + name + " заселен в номер: " + number);
-
-        } catch (DateTimeParseException e) {
-            logger.error("Ошибка формата даты при заселении в номер {}: {}", number, e.getMessage(), e);
-            System.out.println("Неверный формат даты. Используйте YYYY-MM-DD");
-            throw new RuntimeException(e);
+            ui.print("Гость: " + name + " заселен в номер: " + number);
         } catch (HotelException e) {
-            logger.error("Ошибка при заселении гостя '{}' в номер {}: {}", name, number, e.getMessage(), e);
-            System.out.println("Ошибка при заселении: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при заселении гостя '" + name + "' в номер " + number, e);
         }
     }
 
     private void checkOut() {
-        System.out.print("Введите номер комнаты: ");
-        int number = getIntInput();
-
+        int number = ui.readInt("Введите номер комнаты");
         try {
             hotelService.checkOut(number);
-            System.out.println("Гость выселен из номера: " + number);
+            ui.print("Гость выселен из номера: " + number);
         } catch (HotelException e) {
-            logger.error("Ошибка при выселении из номера {}: {}", number, e.getMessage(), e);
-            System.out.println("Ошибка при выселении: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при выселении из номера " + number, e);
         }
     }
 
     private void orderService() {
-        System.out.println("Введите имя заказчика: ");
-        String name = scanner.nextLine();
-        System.out.println("Введите название услуги: ");
-        String service = scanner.nextLine();
-        System.out.println("Введите дату (YYYY-MM-DD): ");
-        LocalDate date = LocalDate.parse(scanner.nextLine());
+        String name = ui.readString("Введите имя заказчика");
+        String service = ui.readString("Введите название услуги");
+        LocalDate date = ui.readDate("Введите дату");
 
         try {
             hotelService.orderService(name, service, date);
-            System.out.println("Услуга " + service + " успешно заказана");
-        } catch (DateTimeParseException e) {
-            logger.error("Ошибка формата даты при заказе услуги '{}': {}", service, e.getMessage(), e);
-            System.out.println("Неверный формат даты. Используйте YYYY-MM-DD.");
-            throw new RuntimeException(e);
+            ui.print("Услуга " + service + " успешно заказана");
         } catch (HotelException e) {
-            logger.error("Ошибка при заказе услуги '{}' для гостя '{}': {}", service, name, e.getMessage(), e);
-            System.out.println("Ошибка при заказе услуги: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при заказе услуги '" + service + "' для гостя '" + name + "'", e);
         }
     }
 
     private void setRoomStatus() {
-        System.out.print("Введите номер комнаты: ");
-        int number = getIntInput();
-        System.out.println("Выберите статус: 1 - AVAILABLE, 2 - OCCUPIED, 3 - REPAIR");
-        int choice = getIntInput();
+        int number = ui.readInt("Введите номер комнаты");
+        int choice = ui.readInt("Выберите статус: 1 - AVAILABLE, 2 - OCCUPIED, 3 - REPAIR");
+
         RoomStatus status;
-        if (choice == 1) {
-            status = RoomStatus.AVAILABLE;
-        } else if (choice == 2) {
-            status = RoomStatus.OCCUPIED;
-        } else if (choice == 3) {
-            status = RoomStatus.REPAIR;
-        } else {
-            System.out.println("Неверный выбор");
+        if (choice == 1) status = RoomStatus.AVAILABLE;
+        else if (choice == 2) status = RoomStatus.OCCUPIED;
+        else if (choice == 3) status = RoomStatus.REPAIR;
+        else {
+            ui.printError("Неверный выбор статуса");
             return;
         }
 
         try {
             hotelService.setRoomStatus(number, status);
-            System.out.println("Статус номера: " + number + " изменен на: " + status);
+            ui.print("Статус номера: " + number + " изменен на: " + status);
         } catch (HotelException e) {
-            logger.error("Ошибка при изменении статуса номера {}: {}", number, e.getMessage(), e);
-            System.out.println("Ошибка при изменении статуса комнаты: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при изменении статуса номера " + number, e);
         }
     }
 
     private void updatePriceRoom() {
-        System.out.print("Введите номер комнаты: ");
-        int number = getIntInput();
-        System.out.print("Введите новую цену: ");
-        double price = getDoubleInput();
+        int number = ui.readInt("Введите номер комнаты");
+        double price = ui.readDouble("Введите новую цену");
 
         try {
             hotelService.updatePriceRoom(number, price);
-            System.out.println("Стоимость номера " + number + " изменена на: " + price);
+            ui.print("Стоимость номера " + number + " изменена на: " + price);
         } catch (HotelException e) {
-            logger.error("Ошибка при обновлении цены номера {}: {}", number, e.getMessage(), e);
-            System.out.println("Ошибка при обновлении цены комнаты: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при обновлении цены номера " + number, e);
         }
     }
 
     private void updatePriceService() {
-        System.out.print("Введите название услуги: ");
-        String name = scanner.nextLine();
-        System.out.print("Введите новую цену: ");
-        double price = getDoubleInput();
+        String name = ui.readString("Введите название услуги");
+        double price = ui.readDouble("Введите новую цену");
 
         try {
             hotelService.updatePriceService(name, price);
-            System.out.println("Стоимость услуги: " + name + " изменена на: " + price);
+            ui.print("Стоимость услуги: " + name + " изменена на: " + price);
         } catch (HotelException e) {
-            logger.error("Ошибка при обновлении цены услуги '{}': {}", name, e.getMessage(), e);
-            System.out.println("Ошибка при обновлении цены услуги: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при обновлении цены услуги '" + name + "'", e);
         }
     }
 
     private void printAllRooms() {
-        System.out.println("Все номера в отеле:");
-        for (Room room : hotelService.getAllRooms()) {
-            System.out.println(room);
-        }
+        ui.print("Все номера в отеле:");
+        hotelService.getAllRooms().forEach(room -> ui.print(room.toString()));
     }
 
     private void printAllServices() {
-        System.out.println("Все предоставляемые услуги:");
-        for (Service service : hotelService.getAllServices()) {
-            System.out.println(service);
-        }
+        ui.print("Все предоставляемые услуги:");
+        hotelService.getAllServices().forEach(service -> ui.print(service.toString()));
     }
 
     private void printSortedRoomsByPrice() {
-        System.out.println("Номера отсортированы по цене:");
-        for (Room room : hotelService.getSortedRooms(Comparator.comparingDouble(Room::getPrice))) {
-            System.out.println(room);
-        }
+        ui.print("Номера отсортированы по цене:");
+        hotelService.getSortedRooms(Comparator.comparingDouble(Room::getPrice))
+                .forEach(room -> ui.print(room.toString()));
     }
 
     private void printSortedRoomsByCapacity() {
-        System.out.println("Номера отсортированы вместительности:");
-        for (Room room : hotelService.getSortedRooms(Comparator.comparingInt(Room::getCapacity))) {
-            System.out.println(room);
-        }
+        ui.print("Номера отсортированы вместительности:");
+        hotelService.getSortedRooms(Comparator.comparingInt(Room::getCapacity))
+                .forEach(room -> ui.print(room.toString()));
     }
 
     private void printSortedRoomsByStars() {
-        System.out.println("Номера отсортированы по звездам:");
-        for (Room room : hotelService.getSortedRooms(Comparator.comparingInt(Room::getStars))) {
-            System.out.println(room);
-        }
+        ui.print("Номера отсортированы по звездам:");
+        hotelService.getSortedRooms(Comparator.comparingInt(Room::getStars))
+                .forEach(room -> ui.print(room.toString()));
     }
 
     private void printAvailableSortedRoomsByPrice() {
-        System.out.println("Свободные номера(отсортированы по цене):");
-        for (Room room : hotelService.getAvailableRooms(Comparator.comparingDouble(Room::getPrice))) {
-            System.out.println(room);
-        }
+        ui.print("Свободные номера (отсортированы по цене):");
+        hotelService.getAvailableRooms(Comparator.comparingDouble(Room::getPrice))
+                .forEach(room -> ui.print(room.toString()));
     }
 
     private void printAvailableSortedRoomsByCapacity() {
-        System.out.println("Свободные номера(отсортированы по вместительности):");
-        for (Room room : hotelService.getAvailableRooms(Comparator.comparingInt(Room::getCapacity))) {
-            System.out.println(room);
-        }
+        ui.print("Свободные номера (отсортированы по вместительности):");
+        hotelService.getAvailableRooms(Comparator.comparingInt(Room::getCapacity))
+                .forEach(room -> ui.print(room.toString()));
     }
 
     private void printAvailableSortedRoomsByStars() {
-        System.out.println("Свободные номера(отсортированы по звездам):");
-        for (Room room : hotelService.getAvailableRooms(Comparator.comparingInt(Room::getStars))) {
-            System.out.println(room);
-        }
+        ui.print("Свободные номера (отсортированы по звездам):");
+        hotelService.getAvailableRooms(Comparator.comparingInt(Room::getStars))
+                .forEach(room -> ui.print(room.toString()));
     }
 
     private void printRoomAvailableByDate() {
-        try {
-            System.out.print("Введите дату (YYYY-MM-DD): ");
-            LocalDate date = LocalDate.parse(scanner.nextLine());
-            System.out.println("Номера свободные к " + date + ":");
-            for (Room room : hotelService.getRoomAvailableByDate(date)) {
-                System.out.println("Номер: " + room.getNumber());
-            }
-        } catch (DateTimeParseException e) {
-            logger.error("Ошибка формата даты при поиске свободных номеров: {}", e.getMessage(), e);
-            System.out.println("Неверный формат даты. Используйте YYYY-MM-DD.");
-            throw new RuntimeException(e);
-        }
+        LocalDate date = ui.readDate("Введите дату");
+        ui.print("Номера свободные к " + date + ":");
+        hotelService.getRoomAvailableByDate(date)
+                .forEach(room -> ui.print("Номер: " + room.getNumber()));
     }
 
     private void printGuestsByAlphabet() {
-        System.out.println("Список постояльцев(отсортирован по алфавиту):");
-        for (Room room : hotelService.getGuests(Comparator.comparing(room -> room.getGuest().getName()))) {
-            System.out.println(room.getGuest().getName() + " выселится " + room.getCheckOutDate() + " из номера " + room.getNumber());
-        }
+        ui.print("Список постояльцев (отсортирован по алфавиту):");
+        hotelService.getGuests(Comparator.comparing(room -> room.getGuest().getName()))
+                .forEach(room -> ui.print(room.getGuest().getName() + " выселится " + room.getCheckOutDate() + " из номера " + room.getNumber()));
     }
 
     private void printGuestsByCheckOutDate() {
-        System.out.println("Список постояльцев(отсортирован по дате выселения):");
-        for (Room room : hotelService.getGuests(Comparator.comparing(Room::getCheckOutDate))) {
-            System.out.println(room.getGuest().getName() + " выселится " + room.getCheckOutDate() + " из номера " + room.getNumber());
-        }
+        ui.print("Список постояльцев (отсортирован по дате выселения):");
+        hotelService.getGuests(Comparator.comparing(Room::getCheckOutDate))
+                .forEach(room -> ui.print(room.getGuest().getName() + " выселится " + room.getCheckOutDate() + " из номера " + room.getNumber()));
     }
 
     private void printCountAvailableRooms() {
-        long count = hotelService.getCountAvailableRooms();
-        System.out.println("Всего свободных номеров: " + count);
+        ui.print("Всего свободных номеров: " + hotelService.getCountAvailableRooms());
     }
 
     private void printCountGuests() {
-        long count = hotelService.getCountGuests();
-        System.out.println("Всего жильцов: " + count);
+        ui.print("Всего жильцов: " + hotelService.getCountGuests());
     }
 
     private void printGuestServicesByPrice() {
-        System.out.print("Введите имя гостя: ");
-        String name = scanner.nextLine();
+        String name = ui.readString("Введите имя гостя");
         try {
             List<ServiceRecord> records = hotelService.getGuestServicesSortedByPrice(name);
             if (records.isEmpty()) {
-                System.out.println("У гостя " + name + " нет заказанных услуг");
+                ui.print("У гостя " + name + " нет заказанных услуг");
                 return;
             }
-            System.out.println("Список услуг постояльца " + name + ", отсортированный по цене:");
-            for (ServiceRecord record : records) {
-                Service service = hotelService.getAllServices().stream()
-                        .filter(s -> s.getId() == record.getServiceId())
-                        .findFirst()
-                        .orElse(null);
-                if (service != null) {
-                    System.out.println("Услуга " + service.getName() + " за " + service.getPrice() + " от " + record.getDate());
-                }
-            }
+            ui.print("Список услуг постояльца " + name + ", отсортированный по цене:");
+            printServiceRecords(records);
         } catch (HotelException e) {
-            logger.error("Ошибка при получении услуг (по цене) для гостя '{}': {}", name, e.getMessage(), e);
-            System.out.println("Ошибка при получении услуг гостя: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при получении услуг гостя", e);
         }
     }
 
     private void printGuestServicesByDate() {
-        System.out.print("Введите имя гостя: ");
-        String name = scanner.nextLine();
+        String name = ui.readString("Введите имя гостя");
         try {
             List<ServiceRecord> records = hotelService.getGuestServicesSortedByDate(name);
             if (records.isEmpty()) {
-                System.out.println("У гостя " + name + " нет заказанных услуг");
+                ui.print("У гостя " + name + " нет заказанных услуг");
                 return;
             }
-            System.out.println("Список услуг постояльца " + name + ", отсортированный по дате:");
-            for (ServiceRecord record : records) {
-                Service service = hotelService.getAllServices().stream()
-                        .filter(s -> s.getId() == record.getServiceId())
-                        .findFirst()
-                        .orElse(null);
-                if (service != null) {
-                    System.out.println("Услуга " + service.getName() + " за " + service.getPrice() + " от " + record.getDate());
-                }
-            }
+            ui.print("Список услуг постояльца " + name + ", отсортированный по дате:");
+            printServiceRecords(records);
         } catch (HotelException e) {
-            logger.error("Ошибка при получении услуг (по дате) для гостя '{}': {}", name, e.getMessage(), e);
-            System.out.println("Ошибка при получении услуг гостя: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при получении услуг гостя", e);
+        }
+    }
+
+    private void printServiceRecords(List<ServiceRecord> records) {
+        for (ServiceRecord record : records) {
+            Service service = hotelService.getAllServices().stream()
+                    .filter(s -> s.getId() == record.getServiceId())
+                    .findFirst()
+                    .orElse(null);
+            if (service != null) {
+                ui.print("Услуга " + service.getName() + " за " + service.getPrice() + " от " + record.getDate());
+            }
         }
     }
 
     private void printPaymentForRoom() {
-        System.out.print("Введите номер комнаты: ");
-        int number = getIntInput();
+        int number = ui.readInt("Введите номер комнаты");
         double payment = hotelService.getPaymentForRoom(number);
-        System.out.println("Сумма к оплате за номер " + number + ": " + payment);
+        ui.print("Сумма к оплате за номер " + number + ": " + payment);
     }
 
     private void printThreeLastGuests() {
-        System.out.print("Введите номер комнаты: ");
-        int number = getIntInput();
+        int number = ui.readInt("Введите номер комнаты");
         try {
             List<Residence> history = hotelService.getThreeLastGuests(number);
-            System.out.println("Последние 3 постояльца номера " + number + ":");
+            ui.print("Последние 3 постояльца номера " + number + ":");
             for (Residence residence : history) {
-                Guest guest = GuestManager.getGuestById(residence.getGuestId());
-                System.out.println(guest.getName());
+                // Используем внедренный guestManager вместо статики
+                try {
+                    Guest guest = guestManager.getGuestById(residence.getGuestId());
+                    ui.print(guest.getName());
+                } catch (Exception e) {
+                    ui.print("Гость ID=" + residence.getGuestId() + " (удален)");
+                }
             }
         } catch (HotelException e) {
-            logger.error("Ошибка при получении истории гостей номера {}: {}", number, e.getMessage(), e);
-            System.out.println("Ошибка при получении последних гостей комнаты: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при получении истории", e);
         }
     }
 
     private void printAllPrices() {
-        System.out.println("Цены на номера:");
-        for (Room room : hotelService.getAllRoomsSortedByPrice()) {
-            System.out.println("Номер " + room.getNumber() + " стоит " + room.getPrice());
-        }
-        System.out.println("Цены услуг:");
-        for (Service service : hotelService.getAllServicesSortedByPrice()) {
-            System.out.println("Услуга " + service.getName() + " стоит " + service.getPrice());
-        }
+        ui.print("Цены на номера:");
+        hotelService.getAllRoomsSortedByPrice().forEach(r -> ui.print("Номер " + r.getNumber() + " стоит " + r.getPrice()));
+
+        ui.print("Цены услуг:");
+        hotelService.getAllServicesSortedByPrice().forEach(s -> ui.print("Услуга " + s.getName() + " стоит " + s.getPrice()));
     }
 
     private void printRoomDetails() {
-        System.out.print("Введите номер комнаты: ");
-        int number = getIntInput();
+        int number = ui.readInt("Введите номер комнаты");
         try {
-            Room room = hotelService.getRoomDetails(number);
-            System.out.println(room);
+            ui.print(hotelService.getRoomDetails(number).toString());
         } catch (HotelException e) {
-            logger.error("Ошибка при получении деталей номера {}: {}", number, e.getMessage(), e);
-            System.out.println("Ошибка при получении деталей комнаты: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка при получении деталей номера", e);
         }
     }
 
     private void exportGuests() {
-        System.out.print("Введите путь файла CSV для экспорта данных о гостях: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для экспорта гостей");
         try {
             hotelService.exportGuests(path);
-            System.out.println("Данные о гостях успешно экспортированы в " + path);
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка экспорта гостей в файл '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при экспорте гостей: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка экспорта", e);
         }
     }
 
     private void importGuests() {
-        System.out.print("Введите путь файла CSV для импорта данных о гостях: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для импорта гостей");
         try {
             hotelService.importGuests(path);
-            System.out.println("Данные о гостях успешно импортированы из " + path);
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка импорта гостей из файла '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при импорте гостей: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка импорта", e);
         }
     }
 
     private void exportServices() {
-        System.out.print("Введите путь файла CSV для экспорта данных об услугах: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для экспорта услуг");
         try {
             hotelService.exportServices(path);
-            System.out.println("Данные об услугах успешно экспортированы в " + path);
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка экспорта услуг в файл '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при экспорте услуг: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка экспорта", e);
         }
     }
 
     private void importServices() {
-        System.out.print("Введите путь файла CSV для импорта данных об услугах: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для импорта услуг");
         try {
             hotelService.importServices(path);
-            System.out.println("Данные об услугах успешно импортированы из " + path);
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка импорта услуг из файла '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при импорте услуг: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка импорта", e);
         }
     }
 
     private void exportRooms() {
-        System.out.print("Введите путь файла CSV для экспорта данных о номерах: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для экспорта номеров");
         try {
             hotelService.exportRooms(path);
-            System.out.println("Данные о номерах успешно экспортированы в " + path);
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка экспорта номеров в файл '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при экспорте номеров: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка экспорта", e);
         }
     }
 
     private void importRooms() {
-        System.out.print("Введите путь файла CSV для импорта данных о номерах: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для импорта номеров");
         try {
             hotelService.importRooms(path);
-            System.out.println("Данные о номерах успешно импортированы из " + path);
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка импорта номеров из файла '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при импорте номеров: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка импорта", e);
         }
     }
 
     private void exportServiceRecords() {
-        System.out.print("Введите путь файла CSV для экспорта данных о записях услуг: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для экспорта записей");
         try {
             hotelService.exportServiceRecords(path);
-            System.out.println("Данные о записях услуг успешно экспортированы в " + path);
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка экспорта записей услуг в файл '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при экспорте записей услуг: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка экспорта", e);
         }
     }
 
     private void importServiceRecords() {
-        System.out.print("Введите путь файла CSV для импорта данных о записях услуг: ");
-        String path = scanner.nextLine();
+        String path = ui.readString("Введите путь файла CSV для импорта записей");
         try {
             hotelService.importServiceRecords(path);
-            System.out.println("Данные о записях услуг успешно импортированы из " + path);
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
-            logger.error("Ошибка импорта записей услуг из файла '{}': {}", path, e.getMessage(), e);
-            System.out.println("Ошибка при импорте записей услуг: " + e.getMessage());
-            throw new RuntimeException(e);
+            handleException("Ошибка импорта", e);
         }
     }
 
-    // вспомогательные методы ввода, тк после nextInt может остаться в буфере
-    private int getIntInput() {
-        while (true) {
-            try {
-                return Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.print("Введите число: ");
-            }
-        }
-    }
-
-    private double getDoubleInput() {
-        while (true) {
-            try {
-                return Double.parseDouble(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.print("Введите число: ");
-            }
-        }
+    private void handleException(String msg, Exception e) {
+        logger.error("{}: {}", msg, e.getMessage(), e);
+        ui.printError(msg + ": " + e.getMessage());
     }
 }

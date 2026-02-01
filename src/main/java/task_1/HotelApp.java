@@ -1,7 +1,7 @@
 package task_1;
 
-import task_1.di.DependencyInjector;
-import task_1.service.HotelService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import task_1.config.AppConfig;
 import task_1.util.IdSyncManager;
 import task_1.view.MenuController;
 
@@ -9,13 +9,12 @@ public class HotelApp {
     public static void main(String[] args) {
         System.out.println("Система управления отелем");
 
-        DependencyInjector di = new DependencyInjector();
-
-        try {
-            HotelService service = (HotelService) di.getDependency(HotelService.class);
-            IdSyncManager idSync = (IdSyncManager) di.getDependency(IdSyncManager.class);
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class)){
+            IdSyncManager idSync = context.getBean(IdSyncManager.class);
             idSync.sync();
-            new MenuController(service).run();
+
+            MenuController menuController = context.getBean(MenuController.class);
+            menuController.run();
         } catch (RuntimeException e) {
             System.err.println("Критическая ошибка: " + e.getMessage());
             e.printStackTrace();

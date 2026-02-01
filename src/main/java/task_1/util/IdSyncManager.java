@@ -1,18 +1,17 @@
 package task_1.util;
 
-import task_1.annotations.Component;
-import task_1.annotations.Inject;
-import task_1.annotations.Singleton;
+import org.springframework.stereotype.Component;
 import task_1.db.ConnectionManager;
 import task_1.exceptions.DaoException;
 import task_1.util.constants.SqlConstants;
 
 @Component
-@Singleton
 public class IdSyncManager {
-
-    @Inject
     private IdGenerator idGenerator;
+
+    public IdSyncManager(IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
+    }
 
     public void sync() {
         long max = 0;

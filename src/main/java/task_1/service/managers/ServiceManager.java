@@ -1,8 +1,8 @@
 package task_1.service.managers;
 
-import task_1.annotations.Component;
-import task_1.annotations.Singleton;
-import task_1.annotations.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import task_1.dao.ServiceDao;
 import task_1.db.ConnectionManager;
 import task_1.exceptions.DaoException;
@@ -14,24 +14,18 @@ import task_1.util.constants.BusinessMessages;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@Component
-@Singleton
+
+@org.springframework.stereotype.Service
 public class ServiceManager {
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
-    private static ServiceManager instance;
+    private final IdGenerator idGenerator;
+    private final ServiceDao serviceDao;
 
-    @Inject
-    private IdGenerator idGenerator;
-
-    @Inject
-    private ServiceDao serviceDao;
-
-    public ServiceManager() {
-        instance = this;
+    public ServiceManager(IdGenerator idGenerator, ServiceDao serviceDao) {
+        this.idGenerator = idGenerator;
+        this.serviceDao = serviceDao;
     }
 
     public void addService(String name, double price) throws HotelException {
@@ -108,10 +102,9 @@ public class ServiceManager {
         }
     }
 
-    public static boolean serviceExists(long id) {
-        if (instance == null || instance.serviceDao == null) return false;
+    public  boolean serviceExists(long id) {
         try {
-            return instance.serviceDao.findById(id).isPresent();
+            return serviceDao.findById(id).isPresent();
         } catch (DaoException e) {
             logger.error("Ошибка проверки существования услуги id={}: {}", id, e.getMessage(), e);
             return false;

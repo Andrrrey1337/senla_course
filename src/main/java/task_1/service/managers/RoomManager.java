@@ -1,8 +1,12 @@
 package task_1.service.managers;
 
-import task_1.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import task_1.dao.GuestDao;
 import task_1.dao.RoomDao;
+import task_1.db.ConnectionManager;
 import task_1.exceptions.DaoException;
 import task_1.exceptions.HotelException;
 import task_1.model.Guest;
@@ -11,33 +15,29 @@ import task_1.model.RoomStatus;
 import task_1.util.IdGenerator;
 import task_1.util.constants.BusinessMessages;
 import task_1.util.constants.CommonConstants;
-import task_1.util.constants.ConfigConstants;
-import task_1.db.ConnectionManager;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
-@Component
-@Singleton
+@Service
 public class RoomManager {
     private static final Logger logger = LoggerFactory.getLogger(RoomManager.class);
 
-    @ConfigProperty(propertyName = ConfigConstants.ROOM_STATUS_CHANGE_ENABLED, type = ConfigType.BOOLEAN)
-    private boolean isAllowChangeStatus;
+    private final boolean isAllowChangeStatus;
+    private final IdGenerator idGenerator;
+    private final RoomDao roomDao;
+    private final GuestDao guestDao;
 
-    @Inject
-    private IdGenerator idGenerator;
-
-    @Inject
-    private RoomDao roomDao;
-
-    @Inject
-    private GuestDao guestDao;
+    public RoomManager(@Value("${room.status.change.enabled}") boolean isAllowChangeStatus,
+                       IdGenerator idGenerator, RoomDao roomDao, GuestDao guestDao) {
+        this.isAllowChangeStatus = isAllowChangeStatus;
+        this.idGenerator = idGenerator;
+        this.roomDao = roomDao;
+        this.guestDao = guestDao;
+    }
 
     public void addRoom(int number, double price, int capacity, int stars) throws HotelException {
         if (price < 0) {

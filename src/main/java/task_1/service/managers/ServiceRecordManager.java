@@ -1,8 +1,8 @@
 package task_1.service.managers;
 
-import task_1.annotations.Component;
-import task_1.annotations.Inject;
-import task_1.annotations.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import task_1.dao.ServiceDao;
 import task_1.dao.ServiceRecordDao;
 import task_1.db.ConnectionManager;
@@ -19,27 +19,24 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@Component
-@Singleton
+@org.springframework.stereotype.Service
 public class ServiceRecordManager {
     private static final Logger logger = LoggerFactory.getLogger(ServiceRecordManager.class);
 
-    @Inject
-    private IdGenerator idGenerator;
+    private final IdGenerator idGenerator;
+    private final GuestManager guestManager;
+    private final ServiceDao serviceDao;
+    private final ServiceRecordDao serviceRecordDao;
 
-    @Inject
-    private GuestManager guestManager;
+    public ServiceRecordManager(IdGenerator idGenerator, GuestManager guestManager,
+                                ServiceDao serviceDao, ServiceRecordDao serviceRecordDao) {
+        this.idGenerator = idGenerator;
+        this.guestManager = guestManager;
+        this.serviceDao = serviceDao;
+        this.serviceRecordDao = serviceRecordDao;
+    }
 
-    @Inject
-    private ServiceDao serviceDao;
-
-    @Inject
-    private ServiceRecordDao serviceRecordDao;
-
-    public ServiceRecordManager() {}
 
     public void orderService(String guestName, String serviceName, LocalDate date) throws HotelException {
         ConnectionManager cm;

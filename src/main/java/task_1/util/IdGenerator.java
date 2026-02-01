@@ -1,10 +1,8 @@
 package task_1.util;
 
-import task_1.annotations.Component;
-import task_1.annotations.Singleton;
+import org.springframework.stereotype.Component;
 
 @Component
-@Singleton
 public class IdGenerator {
     private long nextId = 1;
 

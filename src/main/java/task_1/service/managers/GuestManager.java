@@ -1,8 +1,6 @@
 package task_1.service.managers;
 
-import task_1.annotations.Component;
-import task_1.annotations.Singleton;
-import task_1.annotations.Inject;
+import org.springframework.stereotype.Service;
 import task_1.dao.GuestDao;
 import task_1.db.ConnectionManager;
 import task_1.exceptions.DaoException;
@@ -16,21 +14,16 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
-@Singleton
+@Service
 public class GuestManager {
     private static final Logger logger = LoggerFactory.getLogger(GuestManager.class);
 
-    private static GuestManager instance;
+    private final IdGenerator idGenerator;
+    private final GuestDao guestDao;
 
-    @Inject
-    private IdGenerator idGenerator;
-
-    @Inject
-    private GuestDao guestDao;
-
-    public GuestManager() {
-        instance = this;
+    public GuestManager(IdGenerator idGenerator, GuestDao guestDao) {
+        this.idGenerator = idGenerator;
+        this.guestDao = guestDao;
     }
 
     Guest createOrFindGuest(String name) throws HotelException {
@@ -69,12 +62,9 @@ public class GuestManager {
         }
     }
 
-    public static Guest getGuestById(long id) throws HotelException {
-        if (instance == null || instance.guestDao == null) {
-            throw new HotelException("GuestManager не инициализирован");
-        }
+    public Guest getGuestById(long id) throws HotelException {
         try {
-            return instance.guestDao.findById(id)
+            return guestDao.findById(id)
                     .orElseThrow(() -> new HotelException("Гость с id=" + id + " не найден"));
         } catch (DaoException e) {
             throw new HotelException(e.getMessage(), e);
@@ -114,10 +104,9 @@ public class GuestManager {
         }
     }
 
-    public static boolean guestExists(long id) {
-        if (instance == null || instance.guestDao == null) return false;
+    public  boolean guestExists(long id) {
         try {
-            return instance.guestDao.findById(id).isPresent();
+            return guestDao.findById(id).isPresent();
         } catch (DaoException e) {
             logger.error("Ошибка проверки существования гостя id={}: {}", id, e.getMessage(), e);
             return false;

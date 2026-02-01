@@ -1,6 +1,9 @@
 package task_1.service.managers;
 
-import task_1.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import task_1.dao.ResidenceDao;
 import task_1.db.ConnectionManager;
 import task_1.exceptions.DaoException;
@@ -8,26 +11,24 @@ import task_1.exceptions.HotelException;
 import task_1.model.Residence;
 import task_1.util.IdGenerator;
 import task_1.util.constants.BusinessMessages;
-import task_1.util.constants.ConfigConstants;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@Component
-@Singleton
+@Service
 public class ResidenceManager {
     private static final Logger logger = LoggerFactory.getLogger(ResidenceManager.class);
 
-    @ConfigProperty(propertyName = ConfigConstants.ROOM_RESIDENCE_HISTORY_SIZE, type = ConfigType.INT)
-    private int maxHistorySize;
+    private final int maxHistorySize;
+    private final IdGenerator idGenerator;
+    private final ResidenceDao residenceDao;
 
-    @Inject
-    private IdGenerator idGenerator;
-
-    @Inject
-    private ResidenceDao residenceDao;
+    public ResidenceManager(@Value("${room.residence.history.size}") int maxHistorySize,
+                            IdGenerator idGenerator, ResidenceDao residenceDao) {
+        this.maxHistorySize = maxHistorySize;
+        this.idGenerator = idGenerator;
+        this.residenceDao = residenceDao;
+    }
 
     public Residence createResidence(long guestId, long roomId, LocalDate checkIn, LocalDate checkOut) throws HotelException {
         if (checkIn != null && checkOut != null && checkIn.isAfter(checkOut)) {

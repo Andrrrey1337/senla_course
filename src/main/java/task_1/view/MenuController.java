@@ -1,27 +1,24 @@
 package task_1.view;
 
-import task_1.service.HotelService;
-
-import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MenuController {
     private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
-    private Builder builder;
-    private Menu currentMenu;
-    private final Scanner scanner = new Scanner(System.in);
+    private final Menu currentMenu;
+    private final ConsoleUI ui;
 
-    public MenuController(HotelService hotelService) {
-        this.builder = new Builder(hotelService);
+    public MenuController(Builder builder, ConsoleUI ui) {
+        this.ui = ui;
         this.currentMenu = builder.buildRootMenu();
     }
 
     public void run() {
         while (true) {
             printMenu();
-            System.out.print("Выберите действие: ");
-            int choice = getInt();
+            int choice = ui.readInt("Выберите действие");
             navigate(choice);
         }
     }
@@ -43,16 +40,6 @@ public class MenuController {
             }
         } else {
             System.out.println("Неверный выбор.");
-        }
-    }
-
-    private int getInt() {
-        while (true) {
-            try {
-                return Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.print("Неверный ввод. Повторите: ");
-            }
         }
     }
 }
