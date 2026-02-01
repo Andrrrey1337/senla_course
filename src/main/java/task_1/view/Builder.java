@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import task_1.exceptions.HotelException;
 import task_1.model.*;
 import task_1.service.HotelService;
-import task_1.service.managers.GuestManager; // Добавили импорт
+import task_1.service.managers.GuestManager;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -17,10 +17,9 @@ public class Builder {
     private static final Logger logger = LoggerFactory.getLogger(Builder.class);
 
     private final HotelService hotelService;
-    private final GuestManager guestManager; // Нужно для получения имени гостя по ID
+    private final GuestManager guestManager;
     private final ConsoleUI ui;
 
-    // Внедряем зависимости через конструктор
     public Builder(HotelService hotelService, GuestManager guestManager, ConsoleUI ui) {
         this.hotelService = hotelService;
         this.guestManager = guestManager;
@@ -337,7 +336,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для экспорта гостей");
         try {
             hotelService.exportGuests(path);
-            ui.print("Экспорт успешно завершен.");
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка экспорта", e);
         }
@@ -347,7 +346,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для импорта гостей");
         try {
             hotelService.importGuests(path);
-            ui.print("Импорт успешно завершен.");
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка импорта", e);
         }
@@ -357,7 +356,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для экспорта услуг");
         try {
             hotelService.exportServices(path);
-            ui.print("Экспорт успешно завершен.");
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка экспорта", e);
         }
@@ -367,7 +366,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для импорта услуг");
         try {
             hotelService.importServices(path);
-            ui.print("Импорт успешно завершен.");
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка импорта", e);
         }
@@ -377,7 +376,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для экспорта номеров");
         try {
             hotelService.exportRooms(path);
-            ui.print("Экспорт успешно завершен.");
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка экспорта", e);
         }
@@ -387,7 +386,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для импорта номеров");
         try {
             hotelService.importRooms(path);
-            ui.print("Импорт успешно завершен.");
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка импорта", e);
         }
@@ -397,7 +396,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для экспорта записей");
         try {
             hotelService.exportServiceRecords(path);
-            ui.print("Экспорт успешно завершен.");
+            ui.print("Экспорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка экспорта", e);
         }
@@ -407,7 +406,7 @@ public class Builder {
         String path = ui.readString("Введите путь файла CSV для импорта записей");
         try {
             hotelService.importServiceRecords(path);
-            ui.print("Импорт успешно завершен.");
+            ui.print("Импорт успешно завершен");
         } catch (HotelException e) {
             handleException("Ошибка импорта", e);
         }
