@@ -1,10 +1,6 @@
-DROP TABLE IF EXISTS guest CASCADE;
-DROP TABLE IF EXISTS room CASCADE;
-DROP TABLE IF EXISTS service CASCADE;
-DROP TABLE IF EXISTS serviceRecord CASCADE;
-DROP TABLE IF EXISTS residence CASCADE;
+--liquibase formatted sql
 
-
+--changeset hotel_admin:1
 CREATE TABLE guest (
     id BIGINT PRIMARY KEY,
     name VARCHAR(255) NOT NULL
