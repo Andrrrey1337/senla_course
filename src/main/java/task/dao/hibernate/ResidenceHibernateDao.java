@@ -1,5 +1,6 @@
 package task.dao.hibernate;
 
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import task.dao.ResidenceDao;
 import task.exceptions.DaoException;
@@ -10,8 +11,8 @@ import java.util.List;
 
 @Repository
 public class ResidenceHibernateDao extends AbstractHibernateDao<Residence, Long> implements ResidenceDao {
-    public ResidenceHibernateDao() {
-        super(Residence.class);
+    public ResidenceHibernateDao(SessionFactory sessionFactory) {
+        super(Residence.class, sessionFactory);
     }
 
     @Override

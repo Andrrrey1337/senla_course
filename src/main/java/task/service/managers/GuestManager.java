@@ -1,8 +1,8 @@
 package task.service.managers;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import task.dao.GuestDao;
-import task.db.ConnectionManager;
 import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Guest;
@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
+@Transactional
 public class GuestManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestManager.class);
 
@@ -31,21 +32,14 @@ public class GuestManager {
             throw new HotelException(BusinessMessages.GUEST_NAME_EMPTY);
         }
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
             Optional<Guest> found = guestDao.findByName(name);
             if (found.isPresent()) {
-                ConnectionManager.getInstance().commitTransaction();
                 return found.get();
             }
 
             Guest guest = new Guest(idGenerator.next(), name);
-            Guest created = guestDao.create(guest);
-
-            ConnectionManager.getInstance().commitTransaction();
-            return created;
+            return guestDao.create(guest);
         } catch (DaoException e) {
-            rollbackQuietly();
             throw new HotelException(e.getMessage(), e);
         }
     }
@@ -77,14 +71,6 @@ public class GuestManager {
         } catch (DaoException e) {
             LOGGER.error("Ошибка при получении списка гостей: {}", e.getMessage(), e);
             return List.of();
-        }
-    }
-
-    private void rollbackQuietly() {
-        try {
-            ConnectionManager.getInstance().rollbackTransaction();
-        } catch (DaoException e) {
-            LOGGER.error("Не удалось выполнить откат транзакции: {}", e.getMessage());
         }
     }
 

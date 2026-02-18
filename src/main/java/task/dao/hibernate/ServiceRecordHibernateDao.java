@@ -1,5 +1,6 @@
 package task.dao.hibernate;
 
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import task.dao.ServiceRecordDao;
 import task.exceptions.DaoException;
@@ -11,8 +12,8 @@ import java.util.List;
 
 @Repository
 public class ServiceRecordHibernateDao extends AbstractHibernateDao<ServiceRecord, Long> implements ServiceRecordDao {
-    public ServiceRecordHibernateDao() {
-        super(ServiceRecord.class);
+    public ServiceRecordHibernateDao(SessionFactory sessionFactory) {
+        super(ServiceRecord.class, sessionFactory);
     }
 
     @Override

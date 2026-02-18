@@ -1,15 +1,16 @@
 package task.util;
 
 import org.springframework.stereotype.Component;
-import task.db.ConnectionManager;
+import org.hibernate.SessionFactory;
 import task.exceptions.DaoException;
 import task.util.constants.SqlConstants;
 
 @Component
 public class IdSyncManager {
     private IdGenerator idGenerator;
+    private SessionFactory sessionFactory;
 
-    public IdSyncManager(IdGenerator idGenerator) {
+    public IdSyncManager(IdGenerator idGenerator, SessionFactory sessionFactory) {
         this.idGenerator = idGenerator;
     }
 
@@ -31,7 +32,7 @@ public class IdSyncManager {
 
     private long maxId(String entityName) throws DaoException {
         String hql = "select coalesce(max(id), 0) from " + entityName;
-        org.hibernate.Session session = ConnectionManager.getInstance().getSession();
+        org.hibernate.Session session = sessionFactory.getCurrentSession();
         Long result = session.createQuery(hql, Long.class).uniqueResult();
         return result != null ? result : 0;
     }

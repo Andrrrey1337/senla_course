@@ -3,8 +3,8 @@ package task.service.managers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 import task.dao.ServiceDao;
-import task.db.ConnectionManager;
 import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Service;
@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-
+@Transactional
 @org.springframework.stereotype.Service
 public class ServiceManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
@@ -36,17 +36,12 @@ public class ServiceManager {
             throw new HotelException(BusinessMessages.PRICE_NEGATIVE);
         }
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
             if (serviceDao.findByName(name).isPresent()) {
                 throw new HotelException("Услуга с названием '" + name + "' уже существует");
             }
             serviceDao.create(new Service(idGenerator.next(), name, price));
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
+        } catch (DaoException e) {
+            throw new HotelException(e.getMessage(), e);
         }
     }
 
@@ -55,18 +50,13 @@ public class ServiceManager {
             throw new HotelException(BusinessMessages.PRICE_NEGATIVE);
         }
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
             Service service = serviceDao.findByName(name)
                     .orElseThrow(() -> new HotelException(BusinessMessages.SERVICE_NOT_FOUND_PREFIX + name + BusinessMessages.SERVICE_NOT_FOUND_SUFFIX));
 
             service.setPrice(newPrice);
             serviceDao.update(service);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
+        } catch (DaoException e) {
+            throw new HotelException(e.getMessage(), e);
         }
     }
 
@@ -108,14 +98,6 @@ public class ServiceManager {
         } catch (DaoException e) {
             LOGGER.error("Ошибка проверки существования услуги id={}: {}", id, e.getMessage(), e);
             return false;
-        }
-    }
-
-    private void rollbackQuietly() {
-        try {
-            ConnectionManager.getInstance().rollbackTransaction();
-        } catch (DaoException e) {
-            LOGGER.error("Не удалось выполнить откат транзакции: {}", e.getMessage());
         }
     }
 }

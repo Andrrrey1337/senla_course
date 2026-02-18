@@ -3,9 +3,9 @@ package task.service.managers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 import task.dao.ServiceDao;
 import task.dao.ServiceRecordDao;
-import task.db.ConnectionManager;
 import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Guest;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @org.springframework.stereotype.Service
+@Transactional
 public class ServiceRecordManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRecordManager.class);
 
@@ -39,24 +40,17 @@ public class ServiceRecordManager {
 
 
     public void orderService(String guestName, String serviceName, LocalDate date) throws HotelException {
-        ConnectionManager cm;
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
             Service service = serviceDao.findByName(serviceName)
                     .orElseThrow(() -> new HotelException(
                             BusinessMessages.SERVICE_NOT_FOUND_PREFIX + serviceName + BusinessMessages.SERVICE_NOT_FOUND_SUFFIX
                     ));
 
-          Guest guest = guestManager.createOrFindGuest(guestName);
-
+            Guest guest = guestManager.createOrFindGuest(guestName);
             ServiceRecord record = new ServiceRecord(idGenerator.next(), guest.getId(), service.getId(), date);
             serviceRecordDao.create(record);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
+        } catch (DaoException e) {
+            throw new HotelException(e.getMessage(), e);
         }
     }
 
@@ -93,14 +87,6 @@ public class ServiceRecordManager {
             return serviceRecordDao.findAll();
         } catch (DaoException e) {
             throw new HotelException(e.getMessage(), e);
-        }
-    }
-
-    private void rollbackQuietly() {
-        try {
-            ConnectionManager.getInstance().rollbackTransaction();
-        } catch (DaoException e) {
-            LOGGER.error("Не удалось выполнить откат транзакции: {}", e.getMessage());
         }
     }
 

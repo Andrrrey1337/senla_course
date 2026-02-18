@@ -1,5 +1,6 @@
 package task.dao.hibernate;
 
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import task.dao.GuestDao;
 import task.exceptions.DaoException;
@@ -10,8 +11,8 @@ import java.util.Optional;
 
 @Repository
 public class GuestHibernateDao extends AbstractHibernateDao<Guest, Long> implements GuestDao {
-    public GuestHibernateDao() {
-        super(Guest.class);
+    public GuestHibernateDao(SessionFactory sessionFactory) {
+        super(Guest.class, sessionFactory);
     }
 
     @Override

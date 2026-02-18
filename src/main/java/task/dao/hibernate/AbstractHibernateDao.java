@@ -1,8 +1,8 @@
 package task.dao.hibernate;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import task.dao.GenericDao;
-import task.db.ConnectionManager;
 import task.exceptions.DaoException;
 
 import java.util.List;
@@ -12,15 +12,17 @@ import java.util.Optional;
 public abstract class AbstractHibernateDao<T, ID> implements GenericDao<T, ID> {
 
     private final Class<T> clazz;
+    protected final SessionFactory sessionFactory;
 
-    protected AbstractHibernateDao(Class<T> clazz) {
+    protected AbstractHibernateDao(Class<T> clazz, SessionFactory sessionFactory) {
         this.clazz = clazz;
+        this.sessionFactory = sessionFactory;
     }
 
-    protected Session getSession() throws DaoException {
-        return ConnectionManager.getInstance().getSession();
-    }
 
+    protected Session getSession() {
+        return sessionFactory.getCurrentSession();
+    }
     @Override
     public T create(T entity) throws DaoException {
         getSession().persist(entity);

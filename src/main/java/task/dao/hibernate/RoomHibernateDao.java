@@ -1,5 +1,6 @@
 package task.dao.hibernate;
 
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import task.dao.RoomDao;
 import task.exceptions.DaoException;
@@ -11,8 +12,8 @@ import java.util.Optional;
 
 @Repository
 public class RoomHibernateDao extends AbstractHibernateDao<Room, Long> implements RoomDao {
-    public RoomHibernateDao() {
-        super(Room.class);
+    public RoomHibernateDao(SessionFactory sessionFactory) {
+        super(Room.class, sessionFactory);
     }
 
     @Override

@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import task.dao.GuestDao;
 import task.dao.RoomDao;
-import task.db.ConnectionManager;
 import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Guest;
@@ -23,6 +23,7 @@ import java.util.Optional;
 
 
 @Service
+@Transactional
 public class RoomManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomManager.class);
 
@@ -44,16 +45,13 @@ public class RoomManager {
             throw new HotelException(BusinessMessages.PRICE_NEGATIVE);
         }
         try {
-            ConnectionManager.getInstance().beginTransaction();
             if (roomDao.findByNumber(number).isPresent()) {
                 throw new HotelException(BusinessMessages.ROOM_ALREADY_EXISTS_PREFIX + number + BusinessMessages.ROOM_ALREADY_EXISTS_SUFFIX);
             }
             Room room = new Room(idGenerator.next(), number, price, capacity, stars);
             roomDao.create(room);
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
+        } catch (DaoException e) {
+            throw new HotelException(e.getMessage(), e);
         }
     }
 
@@ -62,16 +60,11 @@ public class RoomManager {
             throw new HotelException(BusinessMessages.PRICE_NEGATIVE);
         }
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
             Room room = getRoomDetails(number);
             room.setPrice(newPrice);
             roomDao.update(room);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
+        } catch (DaoException e) {
+            throw new HotelException(e.getMessage(), e);
         }
 
     }
@@ -81,16 +74,11 @@ public class RoomManager {
             throw new HotelException(BusinessMessages.ROOM_STATUS_CHANGE_DISABLED);
         }
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
             Room room = getRoomDetails(number);
             room.setStatus(status);
             roomDao.update(room);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
+        } catch (DaoException e) {
+            throw new HotelException(e.getMessage(), e);
         }
     }
 
@@ -202,14 +190,6 @@ public class RoomManager {
             roomDao.update(room);
         } catch (DaoException e) {
             throw new HotelException(e.getMessage(), e);
-        }
-    }
-
-    private void rollbackQuietly() {
-        try {
-            ConnectionManager.getInstance().rollbackTransaction();
-        } catch (DaoException e) {
-            System.err.println("Не удалось выполнить rollback: " + e.getMessage());
         }
     }
 }
