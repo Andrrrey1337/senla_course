@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Guest;
 import task.model.Room;
@@ -16,8 +15,6 @@ import java.time.LocalDate;
 @Service
 @Transactional
 public class BookingManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BookingManager.class);
-
     private final RoomManager roomManager;
     private final GuestManager guestManager;
     private final ResidenceManager residenceManager;

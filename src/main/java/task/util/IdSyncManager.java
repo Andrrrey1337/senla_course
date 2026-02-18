@@ -2,7 +2,6 @@ package task.util;
 
 import org.springframework.stereotype.Component;
 import org.hibernate.SessionFactory;
-import task.exceptions.DaoException;
 import task.util.constants.SqlConstants;
 
 @Component

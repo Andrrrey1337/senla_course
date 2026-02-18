@@ -3,7 +3,6 @@ package task.dao.hibernate;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import task.dao.ServiceDao;
-import task.exceptions.DaoException;
 import task.model.Service;
 
 import org.hibernate.query.Query;
@@ -16,7 +15,7 @@ public class ServiceHibernateDao extends AbstractHibernateDao<Service, Long> imp
     }
 
     @Override
-    public Optional<Service> findByName(String name) throws DaoException {
+    public Optional<Service> findByName(String name) {
         String hql = "from Service where name = :name";
         Query<Service> query = getSession().createQuery(hql, Service.class);
         query.setParameter("name", name);

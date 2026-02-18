@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import task.dao.ResidenceDao;
-import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Residence;
 import task.util.IdGenerator;
@@ -18,7 +17,6 @@ import java.util.List;
 @Service
 @Transactional
 public class ResidenceManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResidenceManager.class);
 
     private final int maxHistorySize;
     private final IdGenerator idGenerator;
@@ -35,21 +33,12 @@ public class ResidenceManager {
         if (checkIn != null && checkOut != null && checkIn.isAfter(checkOut)) {
             throw new HotelException(BusinessMessages.RESIDENCE_CHECKIN_AFTER_CHECKOUT);
         }
-        try {
-            Residence residence = new Residence(idGenerator.next(), guestId, roomId, checkIn, checkOut);
-            return residenceDao.create(residence);
-        } catch (DaoException e) {
-            throw new HotelException(e.getMessage(), e);
-        }
+        Residence residence = new Residence(idGenerator.next(), guestId, roomId, checkIn, checkOut);
+        return residenceDao.create(residence);
     }
 
     public List<Residence> getLastByRoom(long roomId) {
-        try {
-            int limit = Math.max(0, maxHistorySize);
-            return residenceDao.findLastByRoom(roomId, limit);
-        } catch (DaoException e) {
-            LOGGER.error("Ошибка при получении истории заселений для комнаты id={}: {}", roomId, e.getMessage(), e);
-            return List.of();
-        }
+        int limit = Math.max(0, maxHistorySize);
+        return residenceDao.findLastByRoom(roomId, limit);
     }
 }

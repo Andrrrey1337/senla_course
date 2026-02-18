@@ -1,23 +1,21 @@
 package task.dao;
 
-import task.exceptions.DaoException;
-
 import java.util.List;
 import java.util.Optional;
 
 
 public interface GenericDao<T, ID> {
-    T create(T entity) throws DaoException;
+    T create(T entity);
 
-    Optional<T> findById(ID id) throws DaoException;
+    Optional<T> findById(ID id);
 
     List<T> findAll() throws DaoException;
 
-    T update(T entity) throws DaoException;
+    T update(T entity);
 
-    boolean deleteById(ID id) throws DaoException;
+    boolean deleteById(ID id);
 
-    default boolean delete(T entity, IdExtractor<T, ID> extractor) throws DaoException {
+    default boolean delete(T entity, IdExtractor<T, ID> extractor) {
         if (entity == null) return false;
         return deleteById(extractor.getId(entity));
     }

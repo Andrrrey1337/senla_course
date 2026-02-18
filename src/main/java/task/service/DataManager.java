@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import task.db.ConnectionManager;
-import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Guest;
 import task.model.Room;
