@@ -25,7 +25,7 @@ public class GuestManager {
         this.guestDao = guestDao;
     }
 
-    Guest createOrFindGuest(String name) throws HotelException {
+    public Guest createOrFindGuest(String name) throws HotelException {
         if (name == null || name.isEmpty()) {
             throw new HotelException(BusinessMessages.GUEST_NAME_EMPTY);
         }

@@ -1,18 +1,29 @@
 package task.util;
 
-import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import task.util.constants.SqlConstants;
 
 @Component
 public class IdSyncManager {
-    private IdGenerator idGenerator;
-    private SessionFactory sessionFactory;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IdSyncManager.class);
+
+    private final IdGenerator idGenerator;
+    private final SessionFactory sessionFactory;
 
     public IdSyncManager(IdGenerator idGenerator, SessionFactory sessionFactory) {
         this.idGenerator = idGenerator;
+        this.sessionFactory = sessionFactory;
     }
 
+    @PostConstruct
+    @Transactional(readOnly = true)
     public void sync() {
         long max = 0;
         try {
@@ -23,15 +34,16 @@ public class IdSyncManager {
             max = Math.max(max, maxId(SqlConstants.T_SERVICE_RECORDS));
 
             idGenerator.setNext(max + 1);
-            System.out.println("IdGenerator синхронизирован: nextId=" + (max + 1));
-        } catch (DaoException e) {
+            LOGGER.info("IdGenerator синхронизирован при запуске: nextId={}", (max + 1));
+        } catch (Exception e) {
+            LOGGER.error("Ошибка при синхронизации IdGenerator", e);
             throw new RuntimeException("Не удалось синхронизировать IdGenerator: " + e.getMessage(), e);
         }
     }
 
-    private long maxId(String entityName) throws DaoException {
+    private long maxId(String entityName) {
         String hql = "select coalesce(max(id), 0) from " + entityName;
-        org.hibernate.Session session = sessionFactory.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         Long result = session.createQuery(hql, Long.class).uniqueResult();
         return result != null ? result : 0;
     }

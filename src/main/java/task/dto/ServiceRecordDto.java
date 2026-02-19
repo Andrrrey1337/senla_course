@@ -2,6 +2,7 @@ package task.dto;
 
 import java.time.LocalDate;
 
+//выдача истории услуг
 public class ServiceRecordDto {
 
     private Long id;

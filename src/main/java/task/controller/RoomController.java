@@ -4,6 +4,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import task.dto.RoomDto;
 import task.model.Room;
+import task.model.RoomStatus;
 import task.service.managers.RoomManager;
 
 import java.time.LocalDate;
@@ -117,6 +118,16 @@ public class RoomController {
     }
 
 
+    //put запросы - обновление
+    @PutMapping("/{number}/price")
+    public void updateRoomPrice(@PathVariable int number, @RequestBody Double newPrice) {
+        roomManager.updatePriceRoom(number, newPrice);
+    }
+
+    @PutMapping("/{number}/status")
+    public void updateRoomStatus(@PathVariable int number, @RequestBody RoomStatus roomStatus) {
+        roomManager.setRoomStatus(number, roomStatus);
+    }
 
 
     // entity в dto
