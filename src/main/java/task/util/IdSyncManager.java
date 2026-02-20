@@ -1,10 +1,11 @@
 package task.util;
 
-import jakarta.annotation.PostConstruct;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import task.util.constants.SqlConstants;
@@ -22,7 +23,7 @@ public class IdSyncManager {
         this.sessionFactory = sessionFactory;
     }
 
-    @PostConstruct
+    @EventListener(ContextRefreshedEvent.class)
     @Transactional(readOnly = true)
     public void sync() {
         long max = 0;

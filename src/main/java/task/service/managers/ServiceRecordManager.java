@@ -1,8 +1,6 @@
 package task.service.managers;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import task.dao.ServiceDao;
 import task.dao.ServiceRecordDao;

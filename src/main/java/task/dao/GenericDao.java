@@ -9,7 +9,7 @@ public interface GenericDao<T, ID> {
 
     Optional<T> findById(ID id);
 
-    List<T> findAll() throws DaoException;
+    List<T> findAll();
 
     T update(T entity);
 
