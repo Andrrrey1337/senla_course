@@ -1,6 +1,7 @@
 package task.controller;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +36,7 @@ public class RoomController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public List<RoomDto> getAllRooms(@RequestParam(required = false, defaultValue = "number") String sortBy) {
         sortBy = sortBy.toLowerCase();
         Comparator<Room> comparator = sortBy.equals("price")
@@ -47,6 +49,7 @@ public class RoomController {
     }
 
     @GetMapping("/available")
+    @Transactional(readOnly = true)
     public List<RoomDto> getAvailableRooms(@RequestParam(required = false, defaultValue = "number") String sortBy) {
         Comparator<Room> comparator;
 
@@ -77,6 +80,7 @@ public class RoomController {
     }
 
     @GetMapping("/available/date")
+    @Transactional(readOnly = true)
     public List<RoomDto> getRoomAvailableByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return roomManager.getRoomAvailableByDate(date).stream()
@@ -85,6 +89,7 @@ public class RoomController {
     }
 
     @GetMapping("/occupied")
+    @Transactional(readOnly = true)
     public List<RoomDto> getOccupiedRooms(@RequestParam(required = false, defaultValue = "number") String sortBy) {
         Comparator<Room> comparator;
 

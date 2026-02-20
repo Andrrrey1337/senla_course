@@ -1,11 +1,14 @@
 package task.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 
 //заказ услуги
 public class OrderServiceDto {
     private String guestName;
     private String serviceName;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     public OrderServiceDto() {

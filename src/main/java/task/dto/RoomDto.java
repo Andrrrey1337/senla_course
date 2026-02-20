@@ -1,5 +1,7 @@
 package task.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 
 public class RoomDto {
@@ -11,7 +13,9 @@ public class RoomDto {
     private int stars;
     private String status;
     private Long guestId;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate checkInDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate checkOutDate;
 
     public RoomDto() {

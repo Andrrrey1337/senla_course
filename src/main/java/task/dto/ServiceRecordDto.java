@@ -1,5 +1,7 @@
 package task.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 
 //выдача истории услуг
@@ -8,6 +10,7 @@ public class ServiceRecordDto {
     private Long id;
     private Long guestId;
     private Long serviceId;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     public ServiceRecordDto() {
