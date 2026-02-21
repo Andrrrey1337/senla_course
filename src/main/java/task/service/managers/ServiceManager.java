@@ -1,6 +1,8 @@
 package task.service.managers;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import task.dao.ServiceDao;
 import task.exceptions.HotelException;
@@ -15,6 +17,7 @@ import java.util.Optional;
 @Transactional
 @org.springframework.stereotype.Service
 public class ServiceManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
 
     private final IdGenerator idGenerator;
     private final ServiceDao serviceDao;
@@ -35,6 +38,7 @@ public class ServiceManager {
             throw new HotelException("Услуга с названием '" + name + "' уже существует");
         }
         serviceDao.create(new Service(idGenerator.next(), name, price));
+        LOGGER.info("Добавлена новая платная услуга: '{}', цена: {}", name, price);
     }
 
     public void updatePriceService(String name, double newPrice) throws HotelException {
@@ -44,8 +48,10 @@ public class ServiceManager {
         Service service = serviceDao.findByName(name)
                 .orElseThrow(() -> new HotelException(BusinessMessages.SERVICE_NOT_FOUND_PREFIX + name + BusinessMessages.SERVICE_NOT_FOUND_SUFFIX));
 
+        double oldPrice = service.getPrice();
         service.setPrice(newPrice);
         serviceDao.update(service);
+        LOGGER.info("Изменена цена услуги '{}'. Старая цена: {}, Новая цена: {}", name, oldPrice, newPrice);
     }
 
     public List<Service> getAllServices() {

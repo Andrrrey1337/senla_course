@@ -1,5 +1,7 @@
 package task.service.managers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import java.util.List;
 @Service
 @Transactional
 public class ResidenceManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResidenceManager.class);
 
     private final int maxHistorySize;
     private final IdGenerator idGenerator;
@@ -32,6 +35,8 @@ public class ResidenceManager {
             throw new HotelException(BusinessMessages.RESIDENCE_CHECKIN_AFTER_CHECKOUT);
         }
         Residence residence = new Residence(idGenerator.next(), guestId, roomId, checkIn, checkOut);
+        LOGGER.info("Сохранена история проживания: гость ID={} в комнате ID={} с {} по {}",
+                guestId, roomId, checkIn, checkOut);
         return residenceDao.create(residence);
     }
 

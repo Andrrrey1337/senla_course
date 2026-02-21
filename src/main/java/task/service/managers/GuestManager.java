@@ -1,5 +1,7 @@
 package task.service.managers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import task.dao.GuestDao;
@@ -14,6 +16,7 @@ import java.util.Optional;
 @Service
 @Transactional
 public class GuestManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GuestManager.class);
 
     private final IdGenerator idGenerator;
     private final GuestDao guestDao;
@@ -29,10 +32,12 @@ public class GuestManager {
         }
         Optional<Guest> found = guestDao.findByName(name);
         if (found.isPresent()) {
+            LOGGER.info("Найден существующий гость в базе: {}", name);
             return found.get();
         }
 
         Guest guest = new Guest(idGenerator.next(), name);
+        LOGGER.info("Зарегистрирован новый гость: {}", name);
         return guestDao.create(guest);
     }
 

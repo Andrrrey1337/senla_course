@@ -1,6 +1,8 @@
 package task.service;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ import java.util.List;
 
 @Service
 public class DataManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataManager.class);
     private final String dataPath;
 
     private final RoomManager roomManager;
@@ -55,7 +58,9 @@ public class DataManager {
         }
         try {
             CsvManager.write(dataPath + "importGuests.csv", lines);
+            LOGGER.info("Экспорт гостей успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте гостей из файла", e);
             throw new HotelException("Ошибка при экспорте гостей в файл: " + e.getMessage(), e);
         }
     }
@@ -73,8 +78,9 @@ public class DataManager {
                 guestManager.updateOrCreateGuest(id, name);
             }
             if (maxIdSeen > 0) idGeneratorState.setNext(maxIdSeen + 1);
-
+            LOGGER.info("Импорт гостей успешно завершен. Обработано записей: {}", rows.size());
         } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при импорте гостей из файла", e);
             throw new HotelException("Ошибка при импорте гостей из файла: " + e.getMessage(), e);
         }
     }
@@ -89,7 +95,9 @@ public class DataManager {
         }
         try {
             CsvManager.write(dataPath + "importServices.csv", lines);
+            LOGGER.info("Экспорт услуг успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте услуг из файла", e);
             throw new HotelException("Ошибка при экспорте услуг в файл: " + e.getMessage(), e);
         }
     }
@@ -108,8 +116,9 @@ public class DataManager {
                 serviceManager.updateOrCreateService(id, name, price);
             }
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
-
+            LOGGER.info("Импорт услуг успешно завершен. Обработано записей: {}", rows.size());
         } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при импорте услуг из файла", e);
             throw new HotelException("Ошибка при импорте услуг из файла: " + e.getMessage(), e);
         }
     }
@@ -126,7 +135,9 @@ public class DataManager {
         }
         try {
             CsvManager.write(dataPath + "importRooms.csv", lines);
+            LOGGER.info("Экспорт комнат успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте комнат из файла", e);
             throw new HotelException("Ошибка при экспорте комнат в файл: " + e.getMessage(), e);
         }
     }
@@ -164,8 +175,9 @@ public class DataManager {
             }
 
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
-
+            LOGGER.info("Импорт комнат успешно завершен. Обработано записей: {}", rows.size());
         } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при импорте комнат из файла", e);
             throw new HotelException("Ошибка при импорте комнат из файла: " + e.getMessage(), e);
         }
     }
@@ -180,7 +192,9 @@ public class DataManager {
         }
         try {
             CsvManager.write(dataPath + "importGuests.csv", lines);
+            LOGGER.info("Экспорт записей услуг успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте записей услуг из файла", e);
             throw new HotelException("Ошибка при экспорте записей услуг в файл: " + e.getMessage(), e);
         }
     }
@@ -206,8 +220,9 @@ public class DataManager {
                 serviceRecordManager.updateOrCreateRecord(id, guestId, serviceId, date);
             }
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
-
+            LOGGER.info("Импорт записей услуг успешно завершен. Обработано записей: {}", rows.size());
         } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при записей услуг комнат из файла", e);
             throw new HotelException("Ошибка при импорте записей услуг из файла: " + e.getMessage(), e);
         }
     }

@@ -1,6 +1,8 @@
 package task.service.managers;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import task.dao.ServiceDao;
 import task.dao.ServiceRecordDao;
@@ -20,6 +22,7 @@ import java.util.Map;
 @org.springframework.stereotype.Service
 @Transactional
 public class ServiceRecordManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRecordManager.class);
 
     private final IdGenerator idGenerator;
     private final GuestManager guestManager;
@@ -44,6 +47,7 @@ public class ServiceRecordManager {
         Guest guest = guestManager.createOrFindGuest(guestName);
         ServiceRecord record = new ServiceRecord(idGenerator.next(), guest.getId(), service.getId(), date);
         serviceRecordDao.create(record);
+        LOGGER.info("Оформлен заказ услуги: гость '{}' заказал '{}' на дату {}", guestName, serviceName, date);
     }
 
     public List<ServiceRecord> getGuestServicesSortedByPrice(String guestName) throws HotelException {

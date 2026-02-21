@@ -1,5 +1,7 @@
 package task.service.managers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import java.util.Optional;
 @Service
 @Transactional
 public class RoomManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoomManager.class);
 
     private final boolean isAllowChangeStatus;
     private final IdGenerator idGenerator;
@@ -45,6 +48,7 @@ public class RoomManager {
         }
         Room room = new Room(idGenerator.next(), number, price, capacity, stars);
         roomDao.create(room);
+        LOGGER.info("Добавлен новый номер: {}, вместимость: {}, цена: {}", number, capacity, price);
     }
 
     public void updatePriceRoom(int number, double newPrice) throws HotelException {
@@ -54,6 +58,7 @@ public class RoomManager {
         Room room = getRoomDetails(number);
         room.setPrice(newPrice);
         roomDao.update(room);
+        LOGGER.info("Стоимость номера {} изменена на: {}", number, newPrice);
 
     }
 
@@ -64,6 +69,7 @@ public class RoomManager {
         Room room = getRoomDetails(number);
         room.setStatus(status);
         roomDao.update(room);
+        LOGGER.info("Статус номера {} изменен на: {}", number, status);
     }
 
     public double getPaymentForRoom(int number) {
