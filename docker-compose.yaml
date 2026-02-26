@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: hotel_postgres
+    environment:
+      POSTGRES_DB: hotel_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: hotel_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - JAVA_OPTS=-Djdbc.url=jdbc:postgresql://db:5432/hotel_db
+    volumes:
+      - ~/hotel_data:/root/hotel_data
+
+volumes:
+  pg_data:
