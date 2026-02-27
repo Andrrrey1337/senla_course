@@ -4,10 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import task.dao.GuestDao;
 import task.dao.RoomDao;
-import task.db.ConnectionManager;
-import task.exceptions.DaoException;
 import task.exceptions.HotelException;
 import task.model.Guest;
 import task.model.Room;
@@ -23,6 +22,7 @@ import java.util.Optional;
 
 
 @Service
+@Transactional
 public class RoomManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomManager.class);
 
@@ -43,36 +43,22 @@ public class RoomManager {
         if (price < 0) {
             throw new HotelException(BusinessMessages.PRICE_NEGATIVE);
         }
-        try {
-            ConnectionManager.getInstance().beginTransaction();
-            if (roomDao.findByNumber(number).isPresent()) {
-                throw new HotelException(BusinessMessages.ROOM_ALREADY_EXISTS_PREFIX + number + BusinessMessages.ROOM_ALREADY_EXISTS_SUFFIX);
-            }
-            Room room = new Room(idGenerator.next(), number, price, capacity, stars);
-            roomDao.create(room);
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
+        if (roomDao.findByNumber(number).isPresent()) {
+            throw new HotelException(BusinessMessages.ROOM_ALREADY_EXISTS_PREFIX + number + BusinessMessages.ROOM_ALREADY_EXISTS_SUFFIX);
         }
+        Room room = new Room(idGenerator.next(), number, price, capacity, stars);
+        roomDao.create(room);
+        LOGGER.info("Добавлен новый номер: {}, вместимость: {}, цена: {}", number, capacity, price);
     }
 
     public void updatePriceRoom(int number, double newPrice) throws HotelException {
         if (newPrice < 0) {
             throw new HotelException(BusinessMessages.PRICE_NEGATIVE);
         }
-        try {
-            ConnectionManager.getInstance().beginTransaction();
-
-            Room room = getRoomDetails(number);
-            room.setPrice(newPrice);
-            roomDao.update(room);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
-        }
+        Room room = getRoomDetails(number);
+        room.setPrice(newPrice);
+        roomDao.update(room);
+        LOGGER.info("Стоимость номера {} изменена на: {}", number, newPrice);
 
     }
 
@@ -80,29 +66,16 @@ public class RoomManager {
         if (!isAllowChangeStatus) {
             throw new HotelException(BusinessMessages.ROOM_STATUS_CHANGE_DISABLED);
         }
-        try {
-            ConnectionManager.getInstance().beginTransaction();
-
-            Room room = getRoomDetails(number);
-            room.setStatus(status);
-            roomDao.update(room);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (DaoException | HotelException e) {
-            rollbackQuietly();
-            throw (e instanceof HotelException) ? (HotelException) e : new HotelException(e.getMessage(), e);
-        }
+        Room room = getRoomDetails(number);
+        room.setStatus(status);
+        roomDao.update(room);
+        LOGGER.info("Статус номера {} изменен на: {}", number, status);
     }
 
     public double getPaymentForRoom(int number) {
-        try {
-            return roomDao.findByNumber(number)
-                    .map(Room::calculatePayment)
-                    .orElse(0.0);
-        } catch (DaoException e) {
-            LOGGER.error("Ошибка расчета оплаты для номера {}: {}", number, e.getMessage(), e);
-            return 0.0;
-        }
+        return roomDao.findByNumber(number)
+                .map(Room::calculatePayment)
+                .orElse(0.0);
     }
 
     public List<Room> getAllRoomsSortedByPrice() {
@@ -112,21 +85,12 @@ public class RoomManager {
     }
 
     public Room getRoomDetails(int number) throws HotelException {
-        try {
-            return roomDao.findByNumber(number)
-                    .orElseThrow(() -> new HotelException(BusinessMessages.ROOM_NOT_FOUND_PREFIX + number + BusinessMessages.ROOM_NOT_FOUND_SUFFIX));
-        } catch (DaoException e) {
-            throw new HotelException(e.getMessage(), e);
-        }
+        return roomDao.findByNumber(number)
+                .orElseThrow(() -> new HotelException(BusinessMessages.ROOM_NOT_FOUND_PREFIX + number + BusinessMessages.ROOM_NOT_FOUND_SUFFIX));
     }
 
     public List<Room> getAllRooms() {
-        try {
-            return roomDao.findAll();
-        } catch (DaoException e) {
-            LOGGER.error("Ошибка при получении списка всех комнат: {}", e.getMessage(), e);
-            return List.of();
-        }
+        return roomDao.findAll();
     }
 
     public List<Room> getSortedRooms(Comparator<Room> comparator) {
@@ -175,41 +139,25 @@ public class RoomManager {
         if (price < 0) {
             throw new HotelException(BusinessMessages.PRICE_NEGATIVE);
         }
-        try {
-            Optional<Room> byId = roomDao.findById(id);
+        Optional<Room> byId = roomDao.findById(id);
 
-            Room room = new Room(id, number, price, capacity, stars, status, checkInDate, checkOutDate);
+        Room room = new Room(id, number, price, capacity, stars, status, checkInDate, checkOutDate);
 
-            if (guestId > 0) {
-                Guest guest = guestDao.findById(guestId).orElse(new Guest(guestId, CommonConstants.EMPTY_STRING));
-                room.setGuest(guest);
-            } else {
-                room.setGuest(null);
-            }
+        if (guestId > 0) {
+            Guest guest = guestDao.findById(guestId).orElse(new Guest(guestId, CommonConstants.EMPTY_STRING));
+            room.setGuest(guest);
+        } else {
+            room.setGuest(null);
+        }
 
-            if (byId.isPresent()) {
-                roomDao.update(room);
-            } else {
-                roomDao.create(room);
-            }
-        } catch (DaoException e) {
-            throw new HotelException(e.getMessage(), e);
+        if (byId.isPresent()) {
+            roomDao.update(room);
+        } else {
+            roomDao.create(room);
         }
     }
 
     void persist(Room room) throws HotelException {
-        try {
-            roomDao.update(room);
-        } catch (DaoException e) {
-            throw new HotelException(e.getMessage(), e);
-        }
-    }
-
-    private void rollbackQuietly() {
-        try {
-            ConnectionManager.getInstance().rollbackTransaction();
-        } catch (DaoException e) {
-            System.err.println("Не удалось выполнить rollback: " + e.getMessage());
-        }
+        roomDao.update(room);
     }
 }

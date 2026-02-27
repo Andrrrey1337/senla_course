@@ -3,9 +3,9 @@ package task.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import task.db.ConnectionManager;
-import task.exceptions.DaoException;
+import org.springframework.transaction.annotation.Transactional;
 import task.exceptions.HotelException;
 import task.model.Guest;
 import task.model.Room;
@@ -21,13 +21,13 @@ import task.util.IdGenerator;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class DataManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataManager.class);
+    private final String dataPath;
 
     private final RoomManager roomManager;
     private final ServiceManager serviceManager;
@@ -36,9 +36,10 @@ public class DataManager {
     private final ResidenceManager residenceManager;
     private final IdGenerator idGeneratorState;
 
-    public DataManager(RoomManager roomManager, ServiceManager serviceManager,
+    public DataManager(@Value("${data.files.path}")String dataPath, RoomManager roomManager, ServiceManager serviceManager,
                        GuestManager guestManager, ServiceRecordManager serviceRecordManager,
                        ResidenceManager residenceManager, IdGenerator idGeneratorState) {
+        this.dataPath = dataPath;
         this.roomManager = roomManager;
         this.serviceManager = serviceManager;
         this.guestManager = guestManager;
@@ -47,7 +48,7 @@ public class DataManager {
         this.idGeneratorState = idGeneratorState;
     }
 
-    public void exportGuests(String filePath) throws HotelException {
+    public void exportGuests() throws HotelException {
         if (guestManager.getAllGuests().isEmpty()) {
             throw new HotelException("Невозможно экспортировать гостей: список гостей пуст");
         }
@@ -56,17 +57,18 @@ public class DataManager {
             lines.add(guest.getId() + ";" + guest.getName());
         }
         try {
-            CsvManager.write(filePath, lines);
+            CsvManager.write(dataPath + "importGuests.csv", lines);
+            LOGGER.info("Экспорт гостей успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте гостей из файла", e);
             throw new HotelException("Ошибка при экспорте гостей в файл: " + e.getMessage(), e);
         }
     }
 
-    public void importGuests(String filePath) throws HotelException {
+    @Transactional
+    public void importGuests() throws HotelException {
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
-            List<List<String>> rows = CsvManager.read(filePath);
+            List<List<String>> rows = CsvManager.read(dataPath + "importGuests.csv");
             long maxIdSeen = 0;
             for (List<String> cols : rows) {
                 if (cols.size() < 2) continue;
@@ -76,19 +78,14 @@ public class DataManager {
                 guestManager.updateOrCreateGuest(id, name);
             }
             if (maxIdSeen > 0) idGeneratorState.setNext(maxIdSeen + 1);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (NumberFormatException | IOException | DaoException | HotelException e) {
-            try {
-                ConnectionManager.getInstance().rollbackTransaction();
-            } catch (Exception rollbackEx) {
-                LOGGER.error("Не удалось выполнить откат транзакции при импорте гостей: {}", rollbackEx.getMessage(), rollbackEx);
-            }
+            LOGGER.info("Импорт гостей успешно завершен. Обработано записей: {}", rows.size());
+        } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при импорте гостей из файла", e);
             throw new HotelException("Ошибка при импорте гостей из файла: " + e.getMessage(), e);
         }
     }
 
-    public void exportServices(String path) throws HotelException {
+    public void exportServices() throws HotelException {
         if (serviceManager.getAllServices().isEmpty()) {
             throw new HotelException("Невозможно экспортировать услуги: список услуг пуст");
         }
@@ -97,17 +94,18 @@ public class DataManager {
             lines.add(service.getId() + ";" + service.getName() + ";" + service.getPrice());
         }
         try {
-            CsvManager.write(path, lines);
+            CsvManager.write(dataPath + "importServices.csv", lines);
+            LOGGER.info("Экспорт услуг успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте услуг из файла", e);
             throw new HotelException("Ошибка при экспорте услуг в файл: " + e.getMessage(), e);
         }
     }
 
-    public void importServices(String path) throws HotelException {
+    @Transactional
+    public void importServices() throws HotelException {
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
-            List<List<String>> rows = CsvManager.read(path);
+            List<List<String>> rows = CsvManager.read(dataPath + "importServices.csv");
             long maxId = 0;
             for (List<String> c : rows) {
                 if (c.size() < 3) continue;
@@ -118,19 +116,14 @@ public class DataManager {
                 serviceManager.updateOrCreateService(id, name, price);
             }
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (NumberFormatException | IOException | DaoException | HotelException e) {
-            try {
-                ConnectionManager.getInstance().rollbackTransaction();
-            } catch (Exception rollbackEx) {
-                LOGGER.error("Не удалось выполнить откат транзакции при импорте услуг: {}", rollbackEx.getMessage(), rollbackEx);
-            }
+            LOGGER.info("Импорт услуг успешно завершен. Обработано записей: {}", rows.size());
+        } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при импорте услуг из файла", e);
             throw new HotelException("Ошибка при импорте услуг из файла: " + e.getMessage(), e);
         }
     }
 
-    public void exportRooms(String path) throws HotelException {
+    public void exportRooms() throws HotelException {
         if (roomManager.getAllRooms().isEmpty()) {
             throw new HotelException("Невозможно экспортировать комнаты: список комнат пуст");
         }
@@ -141,17 +134,18 @@ public class DataManager {
                     room.getStars() + ";" + room.getStatus() + ";" + guestId + ";" + room.getCheckInDate() + ";" + room.getCheckOutDate());
         }
         try {
-            CsvManager.write(path, lines);
+            CsvManager.write(dataPath + "importRooms.csv", lines);
+            LOGGER.info("Экспорт комнат успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте комнат из файла", e);
             throw new HotelException("Ошибка при экспорте комнат в файл: " + e.getMessage(), e);
         }
     }
 
-    public void importRooms(String path) throws HotelException {
+    @Transactional
+    public void importRooms() throws HotelException {
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
-            List<List<String>> rows = CsvManager.read(path);
+            List<List<String>> rows = CsvManager.read(dataPath + "importRooms.csv");
             long maxId = 0;
             for (List<String> c : rows) {
                 if (c.size() < 7) continue;
@@ -181,19 +175,14 @@ public class DataManager {
             }
 
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (IllegalArgumentException | IOException | DaoException | HotelException e) {
-            try {
-                ConnectionManager.getInstance().rollbackTransaction();
-            } catch (Exception rollbackEx) {
-                LOGGER.error("Не удалось выполнить откат транзакции при импорте комнат: {}", rollbackEx.getMessage(), rollbackEx);
-            }
+            LOGGER.info("Импорт комнат успешно завершен. Обработано записей: {}", rows.size());
+        } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при импорте комнат из файла", e);
             throw new HotelException("Ошибка при импорте комнат из файла: " + e.getMessage(), e);
         }
     }
 
-    public void exportServiceRecords(String path) throws HotelException {
+    public void exportServiceRecords() throws HotelException {
         if (serviceRecordManager.getAllRecords().isEmpty()) {
             throw new HotelException("Невозможно экспортировать записи услуг: список записей пуст");
         }
@@ -202,17 +191,18 @@ public class DataManager {
             lines.add(record.getId() + ";" + record.getGuestId() + ";" + record.getServiceId() + ";" + record.getDate());
         }
         try {
-            CsvManager.write(path, lines);
+            CsvManager.write(dataPath + "importGuests.csv", lines);
+            LOGGER.info("Экспорт записей услуг успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
+            LOGGER.error("Критическая ошибка при экспорте записей услуг из файла", e);
             throw new HotelException("Ошибка при экспорте записей услуг в файл: " + e.getMessage(), e);
         }
     }
 
-    public void importServiceRecords(String path) throws HotelException {
+    @Transactional
+    public void importServiceRecords() throws HotelException {
         try {
-            ConnectionManager.getInstance().beginTransaction();
-
-            List<List<String>> rows = CsvManager.read(path);
+            List<List<String>> rows = CsvManager.read(dataPath + "importServiceRecords.csv");
             long maxId = 0;
             for (List<String> c : rows) {
                 if (c.size() < 4) continue;
@@ -230,14 +220,9 @@ public class DataManager {
                 serviceRecordManager.updateOrCreateRecord(id, guestId, serviceId, date);
             }
             if (maxId > 0) idGeneratorState.setNext(maxId + 1);
-
-            ConnectionManager.getInstance().commitTransaction();
-        } catch (NumberFormatException | DateTimeParseException | IOException | DaoException | HotelException e) {
-            try {
-                ConnectionManager.getInstance().rollbackTransaction();
-            } catch (Exception rollbackEx) {
-                LOGGER.error("Не удалось выполнить откат транзакции при импорте записей услуг: {}", rollbackEx.getMessage(), rollbackEx);
-            }
+            LOGGER.info("Импорт записей услуг успешно завершен. Обработано записей: {}", rows.size());
+        } catch (Exception e) {
+            LOGGER.error("Критическая ошибка при записей услуг комнат из файла", e);
             throw new HotelException("Ошибка при импорте записей услуг из файла: " + e.getMessage(), e);
         }
     }
