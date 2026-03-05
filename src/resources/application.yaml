@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: bank-kafka-app
+
+  # настройки подключения к PostgreSQL
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/bank_db
+    username: bank_user
+    password: bank_password
+    driver-class-name: org.postgresql.Driver
+
+  # настройки Hibernate
+  jpa:
+    hibernate:
+      # совпадают ли  Entity с таблицами в БД
+      ddl-auto: validate
+    show-sql: false
+
+  # Настройки Kafka
+  kafka:
+    # адреса наших трех брокеров
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:29092,localhost:39092,localhost:49092}
+
+    # продюсер
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # exactly Once, ждем подтверждения записи от всех in-sync реплик, в моем случае 2 из 3
+      acks: all
+      properties:
+        # идемпотентность,защита от дубликатов при ретраях
+        enable.idempotence: true
+        # указываем ID транзакции, чтобы писать сообщения по типу БД транзакции
+        transactional.id: "bank-tx-producer-"
+
+    # консюмер
+    consumer:
+      group-id: bank-consumer-group
+      # если консюмер подключается впервые, он начнет читать с самых старых непрочитанных сообщений
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # чтеник пачками
+      max-poll-records: 50
+      properties:
+        # для exactly once, итаем только те сообщения, транзакция по которым успешно завершена продюсером
+        isolation.level: read_committed
+        # Jackson десериализует  JSON в наши Java-классы
+        spring.json.trusted.packages: "*"
+
+    # слушатель
+    listener:
+      # режим пакетной обработки (батчами) для @KafkaListener
+      type: batch
+
+app:
+  kafka:
+    topic: transfers-topic
