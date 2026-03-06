@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: bank_password
       POSTGRES_DB: bank_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
@@ -51,6 +51,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
       # подтверждение от 2 брокеров из 3
       KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
 
   kafka2:
     image: confluentinc/cp-kafka:7.4.4
@@ -69,6 +70,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
       KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
 
   kafka3:
     image: confluentinc/cp-kafka:7.4.4
@@ -87,6 +89,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
       KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
 
 
   kafka-init:
