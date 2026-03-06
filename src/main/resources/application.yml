@@ -48,6 +48,9 @@ spring:
         # Jackson десериализует  JSON в наши Java-классы
         spring.json.trusted.packages: "*"
 
+    listener:
+      type: batch
+
 
 app:
   kafka:
