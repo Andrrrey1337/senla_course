@@ -4,7 +4,7 @@ WORKDIR /app
 # копируем все файлы
 COPY . .
 # компиляция и сборка кода
-RUN mvn clean package -DskipTests -Dcheckstyle.skip=true
+RUN mvn clean package
 
 # Запуск
 FROM tomcat:10.1-jdk17
