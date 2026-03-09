@@ -51,23 +51,13 @@ public class RoomController {
     @GetMapping("/available")
     @Transactional(readOnly = true)
     public List<RoomDto> getAvailableRooms(@RequestParam(required = false, defaultValue = "number") String sortBy) {
-        Comparator<Room> comparator;
 
-        switch (sortBy.toLowerCase()) {
-            case "price":
-                comparator = Comparator.comparing(Room::getPrice);
-                break;
-            case "capacity":
-                comparator = Comparator.comparing(Room::getCapacity);
-                break;
-            case "stars":
-                comparator = Comparator.comparing(Room::getStars);
-                break;
-            case "number":
-            default:
-                comparator = Comparator.comparing(Room::getNumber);
-                break;
-        }
+        Comparator<Room> comparator = switch (sortBy.toLowerCase()) {
+            case "price" -> Comparator.comparing(Room::getPrice);
+            case "capacity" -> Comparator.comparing(Room::getCapacity);
+            case "stars" -> Comparator.comparing(Room::getStars);
+            default -> Comparator.comparing(Room::getNumber);
+        };
 
         return roomManager.getAvailableRooms(comparator).stream()
                 .map(this::convertToDto)
@@ -91,21 +81,14 @@ public class RoomController {
     @GetMapping("/occupied")
     @Transactional(readOnly = true)
     public List<RoomDto> getOccupiedRooms(@RequestParam(required = false, defaultValue = "number") String sortBy) {
-        Comparator<Room> comparator;
 
-        switch (sortBy.toLowerCase()) {
-            case "date":
-                // сортировка по дате выселения
-                comparator = Comparator.comparing(Room::getCheckOutDate, Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-            case "price":
-                comparator = Comparator.comparing(Room::getPrice);
-                break;
-            case "number":
-            default:
-                comparator = Comparator.comparing(Room::getNumber);
-                break;
-        }
+        Comparator<Room> comparator = switch (sortBy.toLowerCase()) {
+            // сортировка по дате выселения
+            case "date" -> comparator = Comparator.comparing(
+                    Room::getCheckOutDate, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "price" -> comparator = Comparator.comparing(Room::getPrice);
+            default -> comparator = Comparator.comparing(Room::getNumber);
+        };
 
         return roomManager.getGuests(comparator).stream()
                 .map(this::convertToDto)
