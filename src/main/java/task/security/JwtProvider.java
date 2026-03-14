@@ -15,8 +15,8 @@ public class JwtProvider {
     private final String jwtSecret;
     private final Long jwtExpirationMs;
 
-    public JwtProvider(@Value("${Jwt.secret}") String jwtSecret,
-                       @Value("${Jwt.expirationMs}") Long jwtExpirationMs) {
+    public JwtProvider(@Value("${jwt.secret}") String jwtSecret,
+                       @Value("${jwt.expirationMs}") Long jwtExpirationMs) {
         this.jwtSecret = jwtSecret;
         this.jwtExpirationMs = jwtExpirationMs;
     }

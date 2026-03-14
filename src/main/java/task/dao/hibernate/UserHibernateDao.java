@@ -2,11 +2,13 @@ package task.dao.hibernate;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.springframework.stereotype.Repository;
 import task.dao.UserDao;
 import task.model.User;
 
 import java.util.Optional;
 
+@Repository
 public class UserHibernateDao extends AbstractHibernateDao<User, Long> implements UserDao {
     protected UserHibernateDao(SessionFactory sessionFactory) {
         super(User.class, sessionFactory);

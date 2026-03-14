@@ -20,11 +20,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userDao.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с логином " + username + "не найден"));
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с логином " + username + " не найден"));
 
         // user в userDetails для spring security
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getLogin())
+                .username(user.getUsername())
                 .password(user.getPassword())
                 .authorities(user.getRole().name()) // роль в строку
                 .build();
