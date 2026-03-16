@@ -22,11 +22,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userDao.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь с логином " + username + " не найден"));
 
+        String[] roles = user.getRoles().stream()
+                .map(Enum::name)
+                .toArray(String[]::new);
+
         // user в userDetails для spring security
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .authorities(user.getRole().name()) // роль в строку
+                .authorities(roles) // роли
                 .build();
     }
 }

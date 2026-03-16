@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtProvider {
@@ -25,10 +26,10 @@ public class JwtProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)); // создаем ключ для подписания
     }
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, List<String> roles) {
         return Jwts.builder()
                 .subject(username) //кому выдан
-                .claim("role", role) // кастомные данные, роль
+                .claim("roles", roles) // кастомные данные, роль
                 .issuedAt(new Date()) // дата выдачи
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // время смерти токена
                 .signWith(getSigningKey()) // подписание токена ключом

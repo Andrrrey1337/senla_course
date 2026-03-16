@@ -44,17 +44,29 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(
                         SessionCreationPolicy.STATELESS)) // Без сессий
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/bookings/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers("/api/data/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/guests/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/guests/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/services/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/services/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/service-records/**").hasAuthority("ROLE_ADMIN")
-                                .anyRequest().authenticated())
+                        // доступ для всех, даже не зареганным пользователям
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/available").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/{number}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/services").permitAll()
+
+                        // только для админов
+                        .requestMatchers("/api/data/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/guests/**").hasAuthority("ROLE_ADMIN")
+
+                        .requestMatchers("/api/bookings/check-out/{roomNumber}").hasAuthority("ROLE_ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/occupied").hasAuthority("ROLE_ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/api/services/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/services/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/service-records/**").hasAuthority("ROLE_ADMIN")
+
+                        .anyRequest().authenticated()
+                )
                 .exceptionHandling(exc -> exc
                         // обработка ошибки 401 Unauthorized (Пользователь не авторизован)
                         .authenticationEntryPoint((request, response, authException) -> {

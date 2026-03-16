@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import task.dao.UserDao;
+import task.dto.AuthDto;
 import task.model.Role;
 import task.model.User;
 import task.security.JwtProvider;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,10 +42,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> log) {
+    public ResponseEntity<?> login(@RequestBody AuthDto authDto) {
         try {
-            String username = log.get("username");
-            String password = log.get("password");
+            String username = authDto.getUsername();
+            String password = authDto.getPassword();
 
             //аутентификация пользователя
             Authentication auth = authenticationManager.authenticate(
@@ -52,12 +55,12 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
             // получаем роль
-            String role = userDetails.getAuthorities().stream()
+            List<String> roles = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
-                    .findFirst().orElse("ROLE_USER");
+                    .toList();
 
             // генерим токен
-            String token = jwtProvider.generateToken(userDetails.getUsername(), role);
+            String token = jwtProvider.generateToken(userDetails.getUsername(), roles);
 
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
@@ -72,9 +75,9 @@ public class AuthController {
 
     @Transactional
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> log) {
-        String username = log.get("username");
-        String password = log.get("password");
+    public ResponseEntity<?> register(@RequestBody AuthDto  authDto) {
+        String username = authDto.getUsername();
+        String password = authDto.getPassword();
 
         Optional<User> user = userDao.findByUsername(username);
         if (user.isPresent()) {
@@ -86,7 +89,7 @@ public class AuthController {
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(passwordEncoder.encode(password));
-        newUser.setRole(Role.ROLE_USER);
+        newUser.setRoles(Collections.singleton(Role.ROLE_USER)); // создаем множество и кладем туда только один элемент
 
         userDao.update(newUser);
 
