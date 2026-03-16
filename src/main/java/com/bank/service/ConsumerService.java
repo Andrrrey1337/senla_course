@@ -73,6 +73,8 @@ public class ConsumerService {
                     .status(status)
                     .build();
 
+            log.info("Сохранение в БД записи перевода: ID={}, Статус={}", transfer.getId(), transfer.getStatus());
+
             // Сохраняем запись о переводе
             transferDao.save(transfer);
         }
