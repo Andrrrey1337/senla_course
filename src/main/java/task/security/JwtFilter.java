@@ -12,13 +12,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import task.service.managers.RoomManager;
 
 import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoomManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtFilter.class);
 
     private final JwtProvider jwtProvider;
     private final UserDetailsService userDetailsService;
@@ -55,8 +54,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             LOGGER.error("Не удалось установить аутентификацию пользователя в фильтре: {}", e.getMessage());
+        } finally {
+            filterChain.doFilter(request, response);
         }
-        // теперь выполнится всегда, так как обрабатываем ошибки
-        filterChain.doFilter(request, response);
     }
 }

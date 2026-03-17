@@ -44,18 +44,22 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(
                         SessionCreationPolicy.STATELESS)) // Без сессий
                 .authorizeHttpRequests(auth -> auth
-                        // доступ для всех, даже не зареганным пользователям
+                        // доступ для user и admin
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/available").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/{number}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/services").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/available").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/{number}").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/services").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+
+                        // только для юзера
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/check-in").hasAnyAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.POST, "/api/service-records/order").hasAnyAuthority("ROLE_USER")
 
                         // только для админов
                         .requestMatchers("/api/data/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/guests/**").hasAuthority("ROLE_ADMIN")
 
-                        .requestMatchers("/api/bookings/check-out/{roomNumber}").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/check-out/{roomNumber}").hasAuthority("ROLE_ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
@@ -63,8 +67,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/api/services/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/services/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/service-records/**").hasAuthority("ROLE_ADMIN")
 
+                        // все остальные ручки для всех зарегистрированных пользователей
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exc -> exc

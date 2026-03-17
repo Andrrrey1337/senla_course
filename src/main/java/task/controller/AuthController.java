@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import task.dao.UserDao;
-import task.dto.AuthDto;
+import task.dto.AuthRequestDto;
+import task.dto.AuthResponseDto;
+import task.dto.MessageResponseDto;
 import task.model.Role;
 import task.model.User;
 import task.security.JwtProvider;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -42,10 +42,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthDto authDto) {
+    public ResponseEntity<?> login(@RequestBody AuthRequestDto authRequestDto) {
         try {
-            String username = authDto.getUsername();
-            String password = authDto.getPassword();
+            String username = authRequestDto.getUsername();
+            String password = authRequestDto.getPassword();
 
             //аутентификация пользователя
             Authentication auth = authenticationManager.authenticate(
@@ -62,28 +62,24 @@ public class AuthController {
             // генерим токен
             String token = jwtProvider.generateToken(userDetails.getUsername(), roles);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return ResponseEntity.ok(response); // вернули 200 и токен
+            return ResponseEntity.ok(new AuthResponseDto(token));
 
         } catch (BadCredentialsException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", "Неверный пароль");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponseDto("Неверное имя пользователя или пароль"));
         }
     }
 
     @Transactional
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AuthDto  authDto) {
-        String username = authDto.getUsername();
-        String password = authDto.getPassword();
+    public ResponseEntity<MessageResponseDto> register(@RequestBody AuthRequestDto authRequestDto) {
+        String username = authRequestDto.getUsername();
+        String password = authRequestDto.getPassword();
 
         Optional<User> user = userDao.findByUsername(username);
         if (user.isPresent()) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", "Пользователь с таким именем уже существует");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponseDto("Пользователь с таким именем уже существует"));
         }
 
         User newUser = new User();
@@ -93,8 +89,7 @@ public class AuthController {
 
         userDao.update(newUser);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Пользователь успешно зарегистрирован");
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MessageResponseDto("Пользователь успешно зарегистрирован"));
     }
 }

@@ -1,16 +1,11 @@
 package task.controller;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import task.dto.RoomDto;
+import task.dto.ValueResponseDto;
 import task.model.Room;
 import task.model.RoomStatus;
 import task.service.managers.RoomManager;
@@ -65,8 +60,8 @@ public class RoomController {
     }
 
     @GetMapping("/available/count")
-    public long getCountAvailableRooms() {
-        return roomManager.getCountAvailableRooms();
+    public ValueResponseDto<Long> getCountAvailableRooms() {
+        return new ValueResponseDto<>(roomManager.getCountAvailableRooms());
     }
 
     @GetMapping("/available/date")
@@ -96,18 +91,19 @@ public class RoomController {
     }
 
     @GetMapping("/occupied/count")
-    public long getCountGuests() {
-        return roomManager.getCountGuests();
+    public ValueResponseDto<Long> getCountGuests() {
+        return new ValueResponseDto<>(roomManager.getCountGuests());
     }
 
     @GetMapping("/{number}/payment")
-    public double getPaymentForRoom(@PathVariable int number) {
-        return roomManager.getPaymentForRoom(number);
+    public ValueResponseDto<Double> getPaymentForRoom(@PathVariable int number) {
+        return new ValueResponseDto<>(roomManager.getPaymentForRoom(number));
     }
 
 
     // post запросы(создание)
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public void addRoom(@RequestBody RoomDto roomDto) {
         roomManager.addRoom(roomDto.getNumber(), roomDto.getPrice(), roomDto.getCapacity(), roomDto.getStars());
     }

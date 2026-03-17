@@ -1,14 +1,15 @@
 package task.dto;
 
-public class AuthDto {
+public class AuthRequestDto {
     private String username;
     private String password;
 
-    public AuthDto() { }
+    public AuthRequestDto() { }
 
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
