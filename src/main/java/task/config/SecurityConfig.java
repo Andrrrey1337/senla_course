@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import task.model.Role;
 import task.security.JwtFilter;
 
 @Configuration
@@ -44,31 +45,42 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(
                         SessionCreationPolicy.STATELESS)) // Без сессий
                 .authorizeHttpRequests(auth -> auth
-                        // доступ для user и admin
+                        // доступ для всех
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/available").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/{number}").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/services").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+
+                        // 1) строгие пути
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/occupied").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/occupied/count").hasAuthority(Role.ROLE_ADMIN.name())
+
+                        // для юзера и админа
+                        .requestMatchers(HttpMethod.GET, "/api/rooms").hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/available").hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/available/count").hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/available/date").hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
+                        .requestMatchers(HttpMethod.GET, "/api/services").hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
 
                         // только для юзера
-                        .requestMatchers(HttpMethod.POST, "/api/bookings/check-in").hasAnyAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.POST, "/api/service-records/order").hasAnyAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/check-in").hasAuthority(Role.ROLE_USER.name())
+                        .requestMatchers(HttpMethod.POST, "/api/service-records/order").hasAuthority(Role.ROLE_USER.name())
 
-                        // только для админов
-                        .requestMatchers("/api/data/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/guests/**").hasAuthority("ROLE_ADMIN")
+                        // 2) пути с переменными
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/{number}/payment").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/check-out/{roomNumber}").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/{number}").hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
 
-                        .requestMatchers(HttpMethod.POST, "/api/bookings/check-out/{roomNumber}").hasAuthority("ROLE_ADMIN")
+                        // 3) маски ** в самый конец, чтобы они не поглотили другие запросы
+                        .requestMatchers("/api/data/**").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers("/api/guests/**").hasAuthority(Role.ROLE_ADMIN.name())
+                        // добавил защиту истории заселений и просмотра услуг
+                        .requestMatchers("/api/residences/**").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/service-records/**").hasAuthority(Role.ROLE_ADMIN.name())
 
-                        .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/occupied").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/api/services/**").hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/services/**").hasAuthority(Role.ROLE_ADMIN.name())
 
-                        .requestMatchers(HttpMethod.POST, "/api/services/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/services/**").hasAuthority("ROLE_ADMIN")
-
-                        // все остальные ручки для всех зарегистрированных пользователей
+                        // 4) все остальные запросы
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exc -> exc
