@@ -52,7 +52,9 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(username, password));
 
             // если проверка прошла, получаем данные пользователя
-            UserDetails userDetails = (UserDetails) auth.getPrincipal();
+            if (!(auth.getPrincipal() instanceof UserDetails userDetails)) {
+                throw new BadCredentialsException("Не удалось получить данные пользователя");
+            }
 
             // получаем роль
             List<String> roles = userDetails.getAuthorities().stream()
