@@ -18,7 +18,7 @@ public class ResidenceController {
     private ResidenceManager residenceManager;
     private RoomManager roomManager;
 
-    private ResidenceController(ResidenceManager residenceManager,  RoomManager roomManager) {
+    public ResidenceController(ResidenceManager residenceManager,  RoomManager roomManager) {
         this.residenceManager = residenceManager;
         this.roomManager = roomManager;
     }

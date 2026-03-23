@@ -1,7 +1,6 @@
 package task.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.mapping.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +51,7 @@ public class AuthControllerTest {
     @BeforeEach
     public void setUp() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(authController)
-                .setControllerAdvice(GlobalExceptionHandler.class)
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
 

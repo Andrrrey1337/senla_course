@@ -21,7 +21,7 @@ import java.util.List;
 public class ServiceController {
     private final ServiceManager serviceManager;
 
-    private ServiceController(ServiceManager serviceManager) {
+    public ServiceController(ServiceManager serviceManager) {
         this.serviceManager = serviceManager;
     }
 
