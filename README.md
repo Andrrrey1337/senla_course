@@ -3,13 +3,14 @@
 REST API приложение для управления отелем. Позволяет бронировать номера, управлять базой гостей, заказывать дополнительные услуги и вести историю проживания
 
 **Стек технологий:**
-* Java 17
-* Spring Framework 7.0 (Context, WebMVC, ORM, JDBC)
-* Hibernate ORM 6.4.4
-* PostgreSQL (драйвер 42.7.8) + Liquibase 5.0.1 (миграции БД)
-* Jackson (JSON обработка)
-* Apache Tomcat 10/11
-* Maven
+* **Язык:** Java 17
+* **Фреймворк:** Spring Framework (Context, WebMVC, ORM, JDBC, Security, Test)
+* **Безопасность:** Spring Security, JWT (JSON Web Tokens)
+* **База данных:** PostgreSQL (драйвер 42.7.8), Hibernate ORM 6.4.4
+* **Миграции БД:** Liquibase 5.0.1
+* **Тестирование:** JUnit 5 (Jupiter), Mockito, MockMvc
+* **Инфраструктура и деплой:** Docker, Docker Compose, Apache Tomcat 10/11
+* **Инструменты и качество кода:** Maven, Jackson (JSON), Checkstyle
 
 ## Первый запуск
 Для первого запуска необходимо создать пустую базу данных PostgreSQL с именем hotel_db. Миграции накатятся автоматически при старте приложения
