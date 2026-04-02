@@ -191,7 +191,7 @@ public class DataManager {
             lines.add(record.getId() + ";" + record.getGuestId() + ";" + record.getServiceId() + ";" + record.getDate());
         }
         try {
-            CsvManager.write(dataPath + "importGuests.csv", lines);
+            CsvManager.write(dataPath + "importServiceRecords.csv", lines);
             LOGGER.info("Экспорт записей услуг успешно завершен. Обработано записей: {}", lines.size());
         } catch (IOException e) {
             LOGGER.error("Критическая ошибка при экспорте записей услуг из файла", e);

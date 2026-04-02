@@ -15,6 +15,13 @@ public class CheckInRequest {
     public CheckInRequest() {
     }
 
+    public CheckInRequest(int roomNumber, String guestName, LocalDate checkInDate, LocalDate checkOutDate) {
+        this.roomNumber = roomNumber;
+        this.guestName = guestName;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+    }
+
     public int getRoomNumber() {
         return roomNumber;
     }
